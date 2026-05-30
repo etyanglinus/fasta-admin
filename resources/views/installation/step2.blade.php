@@ -3,13 +3,14 @@
 @section('content')
     <!-- Title -->
     <div class="text-center text-white mb-4">
-        <h2>6amMart Software Installation</h2>
+        <h2>Fasta Deliveries</h2>
         <h6 class="fw-normal">Please proceed step by step with proper data according to instructions</h6>
     </div>
 
     <!-- Progress -->
     <div class="pb-2">
-        <div class="progress cursor-pointer" role="progressbar" aria-label="6amMart Software Installation"
+        <div class="progress cursor-pointer" role="progressbar" aria-label="
+        Fasta Deliveries Installation"
              aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" data-bs-toggle="tooltip"
              data-bs-placement="top" data-bs-custom-class="custom-progress-tooltip" data-bs-title="Second Step!"
              data-bs-delay='{"hide":1000}'>
@@ -20,23 +21,11 @@
     <!-- Card -->
     <div class="card mt-4">
         <div class="p-4 mb-md-3 mx-xl-4 px-md-5">
-            <div class="d-flex justify-content-end mb-2">
-                <a href="https://help.market.envato.com/hc/en-us/articles/202822600-Where-Is-My-Purchase-Code-"
-                   class="d-flex align-items-center gap-1" target="_blank">
-                    Where to get this information?
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                          data-bs-title="Purchase code information">
-                                <img src="{{asset('public/assets/installation')}}/assets/img/svg-icons/info.svg" alt=""
-                                     class="svg">
-                            </span>
-                </a>
-            </div>
-
             <div class="d-flex align-items-center column-gap-3 flex-wrap">
                 <h5 class="fw-bold fs text-uppercase">Step 2. </h5>
-                <h5 class="fw-normal">Update Purchase Information</h5>
+                <h5 class="fw-normal">Update License Information</h5>
             </div>
-            <p class="mb-4">Provide your <strong>username of codecanyon</strong> & the purchase code </p>
+            <p class="mb-4">Provide your <strong>username </strong> & the license key </p>
 
             <form method="POST" action="{{ route('purchase.code',['token'=>bcrypt('step_3')]) }}">
                 @csrf
@@ -63,7 +52,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="from-group">
-                                    <label for="purchase_key" class="mb-2">Purchase Code</label>
+                                    <label for="purchase_key" class="mb-2">License Key</label>
                                     <input type="text" id="purchase_key" class="form-control" name="purchase_key"
                                            placeholder="Ex: 19xxxxxx-ca5c-49c2-83f6-696a738b0000" required>
                                 </div>

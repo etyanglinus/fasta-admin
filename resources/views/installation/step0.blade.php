@@ -3,7 +3,7 @@
 @section('content')
     <!-- Title -->
     <div class="text-center text-white mb-4">
-        <h2>6amMart Software Installation</h2>
+        <h2>Fasta Deliveries</h2>
         <h6 class="fw-normal">Please proceed step by step with proper data according to instructions</h6>
     </div>
 
@@ -28,8 +28,7 @@
                     <h6 class="fw-bold text-uppercase fs m-0 letter-spacing" style="--fs: 14px">Required
                         Database Information
                     </h6>
-                    <a href="https://6ammart.app/documentation/admin-application-configuration/local/"
-                       target="_blank">Where to get this information?</a>
+
                 </div>
 
                 <div class="px-md-4 pb-sm-3">
