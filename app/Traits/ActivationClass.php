@@ -17,7 +17,7 @@ trait ActivationClass
         );
 
         if (!in_array(request()->ip(), $whitelist)) {
-            return false;
+            return true;
         }
 
         return true;
