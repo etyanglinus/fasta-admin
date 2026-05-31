@@ -483,6 +483,31 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('pages/business-page/shipping-policy', 'BusinessSettingsController@shipping_policy')->name('shipping-policy');
             Route::post('pages/business-page/shipping-policy', 'BusinessSettingsController@shipping_policy_update');
             Route::get('pages/shipping-policy/{status}', 'BusinessSettingsController@shipping_policy_status')->name('shipping-policy-status');
+
+            Route::group(['prefix' => 'content-management', 'as' => 'cms.'], function () {
+                Route::resource('pages', 'Cms\PageController')->except(['show']);
+                Route::get('pages/status/{page}/{status}', 'Cms\PageController@status')->name('pages.status');
+
+                Route::resource('blog-categories', 'Cms\BlogCategoryController')->except(['show']);
+                Route::resource('blog-posts', 'Cms\BlogPostController')->except(['show']);
+                Route::get('blog-posts/status/{blog_post}/{status}', 'Cms\BlogPostController@status')->name('blog-posts.status');
+
+                Route::resource('team-members', 'Cms\TeamMemberController')->except(['show']);
+
+                Route::resource('job-openings', 'Cms\JobOpeningController')->except(['show']);
+                Route::get('job-openings/status/{job_opening}/{status}', 'Cms\JobOpeningController@status')->name('job-openings.status');
+                Route::get('job-openings/{job_opening}/applications', 'Cms\JobOpeningController@applications')->name('job-openings.applications');
+
+                Route::resource('job-applications', 'Cms\JobApplicationController')->only(['index', 'show', 'destroy']);
+                Route::put('job-applications/{job_application}/status', 'Cms\JobApplicationController@status')->name('job-applications.status');
+
+                Route::resource('press-releases', 'Cms\PressReleaseController')->except(['show']);
+                Route::get('press-releases/status/{press_release}/{status}', 'Cms\PressReleaseController@status')->name('press-releases.status');
+
+                Route::resource('media-assets', 'Cms\MediaAssetController')->except(['show']);
+                Route::get('media-assets/status/{media_asset}/{status}', 'Cms\MediaAssetController@status')->name('media-assets.status');
+            });
+
             // Social media
             Route::get('social-media/fetch', 'SocialMediaController@fetch')->name('social-media.fetch');
             Route::get('social-media/status-update', 'SocialMediaController@social_media_status_update')->name('social-media.status-update');

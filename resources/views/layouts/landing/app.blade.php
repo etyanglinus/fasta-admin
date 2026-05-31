@@ -54,14 +54,34 @@
 
     @php($fixed_link = \App\Models\DataSetting::where(['key'=>'fixed_link','type'=>'admin_landing_page'])->first())
     @php($fixed_link = isset($fixed_link->value)?json_decode($fixed_link->value, true):null)
+    @php($landing_page_policy_links = \App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key', ['shipping_policy_status','refund_policy_status','cancellation_policy_status'])->pluck('value','key')->toArray())
+    @php($custom_landing_pages = \Illuminate\Support\Facades\Schema::hasTable('pages') ? \App\Models\Page::where('status', 1)->whereNotIn('slug', ['about-us', 'privacy-policy', 'terms-and-conditions', 'refund', 'shipping-policy', 'cancelation'])->orderBy('title')->get() : collect())
 
     <!-- Mobile menu overlay -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-mob" id="closeMob">&times;</button>
         <a href="{{route('home')}}" onclick="closeMobile()">{{ translate('messages.home') }}</a>
         <a href="{{route('about-us')}}" onclick="closeMobile()">{{ translate('messages.about_us') }}</a>
+        <a href="{{route('blog.index')}}" onclick="closeMobile()">{{ translate('Blog') }}</a>
+        <a href="{{route('careers.index')}}" onclick="closeMobile()">{{ translate('Careers') }}</a>
+        <a href="{{route('press.index')}}" onclick="closeMobile()">{{ translate('Press & Media') }}</a>
         <a href="{{route('privacy-policy')}}" onclick="closeMobile()">{{ translate('messages.privacy_policy') }}</a>
         <a href="{{route('terms-and-conditions')}}" onclick="closeMobile()">{{ translate('messages.terms_and_condition') }}</a>
+        @if (isset($landing_page_policy_links['refund_policy_status']) && $landing_page_policy_links['refund_policy_status'] == 1)
+            <a href="{{route('refund')}}" onclick="closeMobile()">{{ translate('messages.Refund Policy') }}</a>
+        @endif
+        @if (isset($landing_page_policy_links['shipping_policy_status']) && $landing_page_policy_links['shipping_policy_status'] == 1)
+            <a href="{{route('shipping-policy')}}" onclick="closeMobile()">{{ translate('messages.Shipping Policy') }}</a>
+        @endif
+        @if (isset($landing_page_policy_links['cancellation_policy_status']) && $landing_page_policy_links['cancellation_policy_status'] == 1)
+            <a href="{{route('cancelation')}}" onclick="closeMobile()">{{ translate('messages.Cancelation Policy') }}</a>
+        @endif
+        @if ($custom_landing_pages->count())
+            <span class="mobile-menu-title">{{ translate('Others') }}</span>
+            @foreach($custom_landing_pages as $customPage)
+                <a href="{{ route('page.show', $customPage->slug) }}" onclick="closeMobile()">{{ $customPage->title }}</a>
+            @endforeach
+        @endif
         <a href="{{route('contact-us')}}" onclick="closeMobile()">{{ translate('messages.contact_us') }}</a>
         @if (isset($toggle_store_registration) && $toggle_store_registration)
             <a href="{{ route('restaurant.create') }}" onclick="closeMobile()">{{ translate('messages.vendor_registration') }}</a>
@@ -86,8 +106,30 @@
             <div class="nav-links">
                 <a href="{{route('home')}}" class="{{ Request::is('/') ? 'active-link' : '' }}">{{ translate('messages.home') }}</a>
                 <a href="{{route('about-us')}}" class="{{ Request::is('about-us') ? 'active-link' : '' }}">{{ translate('messages.about_us') }}</a>
+                <a href="{{route('blog.index')}}" class="{{ Request::is('blog*') ? 'active-link' : '' }}">{{ translate('Blog') }}</a>
+                <a href="{{route('careers.index')}}" class="{{ Request::is('careers*') ? 'active-link' : '' }}">{{ translate('Careers') }}</a>
+                <a href="{{route('press.index')}}" class="{{ Request::is('press*') ? 'active-link' : '' }}">{{ translate('Press & Media') }}</a>
                 <a href="{{route('privacy-policy')}}" class="{{ Request::is('privacy-policy') ? 'active-link' : '' }}">{{ translate('messages.privacy_policy') }}</a>
                 <a href="{{route('terms-and-conditions')}}" class="{{ Request::is('terms-and-conditions') ? 'active-link' : '' }}">{{ translate('messages.terms_and_condition') }}</a>
+                @if (isset($landing_page_policy_links['refund_policy_status']) && $landing_page_policy_links['refund_policy_status'] == 1)
+                <a href="{{route('refund')}}" class="{{ Request::is('refund') ? 'active-link' : '' }}">{{ translate('messages.Refund Policy') }}</a>
+                @endif
+                @if (isset($landing_page_policy_links['shipping_policy_status']) && $landing_page_policy_links['shipping_policy_status'] == 1)
+                <a href="{{route('shipping-policy')}}" class="{{ Request::is('shipping-policy') ? 'active-link' : '' }}">{{ translate('messages.Shipping Policy') }}</a>
+                @endif
+                @if (isset($landing_page_policy_links['cancellation_policy_status']) && $landing_page_policy_links['cancellation_policy_status'] == 1)
+                <a href="{{route('cancelation')}}" class="{{ Request::is('cancelation') ? 'active-link' : '' }}">{{ translate('messages.Cancelation Policy') }}</a>
+                @endif
+                @if ($custom_landing_pages->count())
+                <div class="nav-more">
+                    <button class="nav-more__btn {{ Request::is('page*') ? 'active-link' : '' }}">{{ translate('Others') }}</button>
+                    <div class="nav-more__dd">
+                        @foreach($custom_landing_pages as $customPage)
+                            <a href="{{ route('page.show', $customPage->slug) }}" class="{{ Request::is('page/'.$customPage->slug) ? 'active' : '' }}">{{ $customPage->title }}</a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 <a href="{{route('contact-us')}}" class="{{ Request::is('contact-us') ? 'active-link' : '' }}">{{ translate('messages.contact_us') }}</a>
             </div>
             <div class="nav-right">
@@ -215,21 +257,33 @@
                     @endif
                 </div>
 
-                @php($landing_data_footer =\App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key', ['shipping_policy_status','refund_policy_status','cancellation_policy_status'])->pluck('value','key')->toArray())
                 <div>
                     <h5>{{translate("messages.Suppport")}}</h5>
                     <div class="f-links">
+                        <a href="{{route('press.index')}}">{{ translate('Press & Media') }}</a>
                         <a href="{{route('privacy-policy')}}">{{ translate('messages.privacy_policy') }}</a>
                         <a href="{{route('terms-and-conditions')}}">{{ translate('messages.terms_and_condition') }}</a>
-                        @if (isset($landing_data_footer['refund_policy_status']) && $landing_data_footer['refund_policy_status'] == 1)
+                        @if (isset($landing_page_policy_links['refund_policy_status']) && $landing_page_policy_links['refund_policy_status'] == 1)
                         <a href="{{route('refund')}}">{{ translate('messages.Refund Policy') }}</a>
                         @endif
-                        @if (isset($landing_data_footer['shipping_policy_status']) && $landing_data_footer['shipping_policy_status'] == 1)
+                        @if (isset($landing_page_policy_links['shipping_policy_status']) && $landing_page_policy_links['shipping_policy_status'] == 1)
                         <a href="{{route('shipping-policy')}}">{{ translate('messages.Shipping Policy') }}</a>
                         @endif
-                        @if (isset($landing_data_footer['cancellation_policy_status']) && $landing_data_footer['cancellation_policy_status'] == 1)
+                        @if (isset($landing_page_policy_links['cancellation_policy_status']) && $landing_page_policy_links['cancellation_policy_status'] == 1)
                         <a href="{{route('cancelation')}}">{{ translate('messages.Cancelation Policy') }}</a>
                         @endif
+                    </div>
+                </div>
+
+                <div>
+                    <h5>{{ translate('Links of Interest') }}</h5>
+                    <div class="f-links">
+                        @forelse($custom_landing_pages as $customPage)
+                            <a href="{{ route('page.show', $customPage->slug) }}">{{ $customPage->title }}</a>
+                        @empty
+                            <a href="{{ route('about-us') }}">{{ translate('messages.about_us') }}</a>
+                            <a href="{{ route('blog.index') }}">{{ translate('Blog') }}</a>
+                        @endforelse
                     </div>
                 </div>
 

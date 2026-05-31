@@ -203,7 +203,7 @@
                     @if (\App\CentralLogics\Helpers::module_permission_check('settings'))
 
                         <li
-                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages*') ? 'active' : '' }}">
+                            class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/pages*') || Request::is('admin/business-settings/content-management*')) ? 'active' : '' }}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"
                                 title="{{ translate('messages.pages_setup') }}">
                                 <i class="tio-pages nav-icon"></i>
@@ -211,7 +211,7 @@
                                     class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.pages_&_social_media') }}</span>
                             </a>
                             <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
-                                style="display:{{ Request::is('admin/business-settings/pages*') ? 'block' : 'none' }}">
+                                style="display:{{ (Request::is('admin/business-settings/pages*') || Request::is('admin/business-settings/content-management*')) ? 'block' : 'none' }}">
 
                                 <li
                                     class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/social-media') ? 'active' : '' }}">
@@ -255,7 +255,7 @@
                                 </li>
 
                                 <li
-                                    class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/business-page*') ? 'active' : '' }}">
+                                    class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/pages/business-page*') || Request::is('admin/business-settings/content-management*')) ? 'active' : '' }}">
                                     <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle"
                                         href="javascript:" title="{{ translate('messages.business_pages') }}">
                                         <span class="tio-circle nav-indicator-icon"></span>
@@ -263,68 +263,92 @@
                                             class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.business_pages') }}</span>
                                     </a>
                                     <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
-                                        style="display:{{ Request::is('admin/business-settings/pages/business-page*') ? 'block' : 'none' }}">
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/terms-and-conditions') ? 'active' : '' }}">
-                                            <a class="nav-link "
-                                                href="{{ route('admin.business-settings.terms-and-conditions') }}"
-                                                title="{{ translate('messages.terms_and_condition') }}">
+                                        style="display:{{ (Request::is('admin/business-settings/pages/business-page*') || Request::is('admin/business-settings/content-management*')) ? 'block' : 'none' }}">
+                                        <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/pages/business-page/about-us') || Request::is('admin/business-settings/content-management/team-members*')) ? 'active' : '' }}">
+                                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.about_us') }}">
                                                 <span class="tio-circle nav-indicator-icon"></span>
-                                                <span
-                                                    class="text-truncate">{{ translate('messages.terms_and_condition') }}</span>
+                                                <span class="text-truncate">{{ translate('messages.about_us') }}</span>
                                             </a>
+                                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ (Request::is('admin/business-settings/pages/business-page/about-us') || Request::is('admin/business-settings/content-management/team-members*')) ? 'block' : 'none' }}">
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/about-us') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.about-us') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.about_us') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/team-members*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.team-members.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Team Members') }}</span></a>
+                                                </li>
+                                            </ul>
                                         </li>
 
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/privacy-policy') ? 'active' : '' }}">
-                                            <a class="nav-link "
-                                                href="{{ route('admin.business-settings.privacy-policy') }}"
-                                                title="{{ translate('messages.privacy_policy') }}">
+                                        <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/content-management/blog-posts*') || Request::is('admin/business-settings/content-management/blog-categories*')) ? 'active' : '' }}">
+                                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('Blog') }}">
                                                 <span class="tio-circle nav-indicator-icon"></span>
-                                                <span
-                                                    class="text-truncate">{{ translate('messages.privacy_policy') }}</span>
+                                                <span class="text-truncate">{{ translate('Blog') }}</span>
                                             </a>
+                                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ (Request::is('admin/business-settings/content-management/blog-posts*') || Request::is('admin/business-settings/content-management/blog-categories*')) ? 'block' : 'none' }}">
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/blog-categories*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.blog-categories.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Blog Categories') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/blog-posts*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.blog-posts.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Blog Posts') }}</span></a>
+                                                </li>
+                                            </ul>
                                         </li>
 
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/about-us') ? 'active' : '' }}">
-                                            <a class="nav-link "
-                                                href="{{ route('admin.business-settings.about-us') }}"
-                                                title="{{ translate('messages.about_us') }}">
+                                        <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/content-management/press-releases*') || Request::is('admin/business-settings/content-management/media-assets*')) ? 'active' : '' }}">
+                                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('Press') }}">
                                                 <span class="tio-circle nav-indicator-icon"></span>
-                                                <span
-                                                    class="text-truncate">{{ translate('messages.about_us') }}</span>
+                                                <span class="text-truncate">{{ translate('Press') }}</span>
                                             </a>
-                                        </li>
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/refund') ? 'active' : '' }}">
-                                            <a class="nav-link " href="{{ route('admin.business-settings.refund') }}"
-                                                title="{{ translate('messages.Refund Policy') }}">
-                                                <span class="tio-circle nav-indicator-icon"></span>
-                                                <span class="text-truncate">{{ translate('Refund Policy') }}</span>
-                                            </a>
+                                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ (Request::is('admin/business-settings/content-management/press-releases*') || Request::is('admin/business-settings/content-management/media-assets*')) ? 'block' : 'none' }}">
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/press-releases*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.press-releases.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Media & Press') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/media-assets*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.media-assets.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Media Assets') }}</span></a>
+                                                </li>
+                                            </ul>
                                         </li>
 
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/cancelation') ? 'active' : '' }}">
-                                            <a class="nav-link "
-                                                href="{{ route('admin.business-settings.cancelation') }}"
-                                                title="{{ translate('messages.Cancelation Policy') }}">
+                                        <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/content-management/job-openings*') || Request::is('admin/business-settings/content-management/job-applications*')) ? 'active' : '' }}">
+                                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.Careers') }}">
                                                 <span class="tio-circle nav-indicator-icon"></span>
-                                                <span
-                                                    class="text-truncate">{{ translate('Cancelation Policy') }}</span>
+                                                <span class="text-truncate">{{ translate('messages.Careers') }}</span>
                                             </a>
+                                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ (Request::is('admin/business-settings/content-management/job-openings*') || Request::is('admin/business-settings/content-management/job-applications*')) ? 'block' : 'none' }}">
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/job-openings*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.job-openings.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Careers') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/job-applications*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.job-applications.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Job Applications') }}</span></a>
+                                                </li>
+                                            </ul>
                                         </li>
 
-
-                                        <li
-                                            class="nav-item {{ Request::is('admin/business-settings/pages/business-page/shipping-policy') ? 'active' : '' }}">
-                                            <a class="nav-link "
-                                                href="{{ route('admin.business-settings.shipping-policy') }}"
-                                                title="{{ translate('messages.shipping_policy') }}">
+                                        <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/pages/business-page/terms-and-conditions') || Request::is('admin/business-settings/pages/business-page/privacy-policy') || Request::is('admin/business-settings/pages/business-page/refund') || Request::is('admin/business-settings/pages/business-page/cancelation') || Request::is('admin/business-settings/pages/business-page/shipping-policy') || Request::is('admin/business-settings/content-management/pages*')) ? 'active' : '' }}">
+                                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.Pages') }}">
                                                 <span class="tio-circle nav-indicator-icon"></span>
-                                                <span class="text-truncate">{{ translate('Shipping Policy') }}</span>
+                                                <span class="text-truncate">{{ translate('messages.Pages') }}</span>
                                             </a>
+                                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ (Request::is('admin/business-settings/pages/business-page/terms-and-conditions') || Request::is('admin/business-settings/pages/business-page/privacy-policy') || Request::is('admin/business-settings/pages/business-page/refund') || Request::is('admin/business-settings/pages/business-page/cancelation') || Request::is('admin/business-settings/pages/business-page/shipping-policy') || Request::is('admin/business-settings/content-management/pages*')) ? 'block' : 'none' }}">
+                                                <li class="nav-item {{ Request::is('admin/business-settings/content-management/pages*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cms.pages.index') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.Pages') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/terms-and-conditions') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.terms-and-conditions') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.terms_and_condition') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/privacy-policy') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.privacy-policy') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('messages.privacy_policy') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/refund') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.refund') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('Refund Policy') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/cancelation') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.cancelation') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('Cancelation Policy') }}</span></a>
+                                                </li>
+                                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/shipping-policy') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ route('admin.business-settings.shipping-policy') }}"><span class="tio-circle nav-indicator-icon"></span><span class="text-truncate">{{ translate('Shipping Policy') }}</span></a>
+                                                </li>
+                                            </ul>
                                         </li>
                                     </ul>
                                 </li>

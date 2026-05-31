@@ -42,6 +42,16 @@ Route::get('privacy-policy', 'HomeController@privacy_policy')->name('privacy-pol
 Route::get('cancelation', 'HomeController@cancelation')->name('cancelation');
 Route::get('refund', 'HomeController@refund_policy')->name('refund');
 Route::get('shipping-policy', 'HomeController@shipping_policy')->name('shipping-policy');
+
+Route::get('page/{slug}', 'PageController@show')->name('page.show');
+Route::get('blog', 'BlogController@index')->name('blog.index');
+Route::get('blog/{slug}', 'BlogController@show')->name('blog.show');
+Route::get('careers', 'CareerController@index')->name('careers.index');
+Route::get('careers/{id}', 'CareerController@show')->name('careers.show');
+Route::post('careers/{id}/apply', 'CareerController@apply')->name('careers.apply');
+Route::get('press', 'PressController@index')->name('press.index');
+Route::get('press/{slug}', 'PressController@show')->name('press.show');
+
 Route::post('newsletter/subscribe', 'NewsletterController@newsLetterSubscribe')->name('newsletter.subscribe');
 Route::get('subscription-invoice/{id}', 'HomeController@subscription_invoice')->name('subscription_invoice');
 Route::get('order-invoice/{id}', 'HomeController@order_invoice')->name('order_invoice');

@@ -7,9 +7,7 @@
     <section class="hero">
         <div class="container">
             <h1>{!! \App\CentralLogics\Helpers::highlight($landing_data['fixed_header_title']) !!}</h1>
-            <div class="hero-logo">
-                <img class="onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" src="{{ \App\CentralLogics\Helpers::logoFullUrl()}}" alt="">
-            </div>
+
             <p>{!! \App\CentralLogics\Helpers::highlight($landing_data['fixed_header_sub_title']) !!}</p>
             @php($toggle_store_registration_hero = \App\CentralLogics\Helpers::get_business_settings('toggle_store_registration'))
             @php($toggle_dm_registration_hero = \App\CentralLogics\Helpers::get_business_settings('toggle_dm_registration'))

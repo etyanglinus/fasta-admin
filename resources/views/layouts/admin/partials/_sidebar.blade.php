@@ -915,12 +915,12 @@
                     </a>
                 </li>
 
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages*') ? 'active' : '' }}">
+                <li class="navbar-vertical-aside-has-menu {{ (Request::is('admin/business-settings/pages*') || Request::is('admin/business-settings/content-management*')) ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.pages_setup') }}">
                         <i class="tio-pages nav-icon"></i>
                         <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.pages_setup') }}</span>
                     </a>
-                    <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ Request::is('admin/business-settings/pages*') ? 'block' : 'none' }}">
+                    <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ (Request::is('admin/business-settings/pages*') || Request::is('admin/business-settings/content-management*')) ? 'block' : 'none' }}">
 
                         <li class="nav-item {{ Request::is('admin/business-settings/pages/terms-and-conditions') ? 'active' : '' }}">
                             <a class="nav-link " href="{{ route('admin.business-settings.terms-and-conditions') }}" title="{{ translate('messages.terms_and_condition') }}">
@@ -961,6 +961,55 @@
                             <a class="nav-link " href="{{ route('admin.business-settings.shipping-policy') }}" title="{{ translate('messages.shipping_policy') }}">
                                 <span class="tio-circle nav-indicator-icon"></span>
                                 <span class="text-truncate">{{ translate('Shipping Policy') }}</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/pages*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.pages.index') }}" title="{{ translate('messages.Pages') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Pages') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/blog-posts*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.blog-posts.index') }}" title="{{ translate('messages.Blog Posts') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Blog Posts') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/blog-categories*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.blog-categories.index') }}" title="{{ translate('messages.Blog Categories') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Blog Categories') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/job-openings*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.job-openings.index') }}" title="{{ translate('messages.Careers') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Careers') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/job-applications*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.job-applications.index') }}" title="{{ translate('messages.Job Applications') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Job Applications') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/team-members*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.team-members.index') }}" title="{{ translate('messages.Team Members') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Team Members') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/press-releases*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.press-releases.index') }}" title="{{ translate('messages.Media & Press') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Media & Press') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ Request::is('admin/business-settings/content-management/media-assets*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.business-settings.cms.media-assets.index') }}" title="{{ translate('messages.Media Assets') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.Media Assets') }}</span>
                             </a>
                         </li>
                     </ul>

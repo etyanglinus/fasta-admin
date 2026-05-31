@@ -1381,14 +1381,109 @@ class BusinessSettingsController extends Controller
     {
         $about_us = DataSetting::withoutGlobalScope('translate')->with('translations')->where('type', 'admin_landing_page')->where('key', 'about_us')->first();
         $about_title = DataSetting::withoutGlobalScope('translate')->with('translations')->where('type', 'admin_landing_page')->where('key', 'about_title')->first();
+        $about_fields = DataSetting::withoutGlobalScope('translate')->with('translations')
+            ->where('type', 'admin_landing_page')
+            ->whereIn('key', [
+                'about_hero_title',
+                'about_hero_subtitle',
+                'about_hero_kicker',
+                'about_hero_note_title',
+                'about_hero_note_text',
+                'about_story_kicker',
+                'about_mission',
+                'about_mission_label',
+                'about_vision',
+                'about_vision_label',
+                'about_impact_kicker',
+                'about_impact_title',
+                'about_impact_items',
+                'about_values_kicker',
+                'about_values_title',
+                'about_values_items',
+                'about_coverage_kicker',
+                'about_coverage_title',
+                'about_coverage_text',
+                'about_coverage_tags',
+                'about_coverage_map_title',
+                'about_coverage_map_text',
+                'about_milestones_kicker',
+                'about_milestones_title',
+                'about_milestones_items',
+                'about_team_kicker',
+                'about_team_title',
+                'about_team_empty_title',
+                'about_team_empty_text',
+                'about_trust_kicker',
+                'about_trust_title',
+                'about_trust_text',
+                'about_privacy_cta',
+                'about_primary_cta',
+                'about_secondary_cta',
+                'about_hero_image',
+            ])
+            ->get()
+            ->keyBy('key');
 
-        return view('admin-views.business-settings.about-us', compact('about_us', 'about_title'));
+        return view('admin-views.business-settings.about-us', compact('about_us', 'about_title', 'about_fields'));
     }
 
     public function about_us_update(Request $request)
     {
         $this->update_data($request, 'about_us');
         $this->update_data($request, 'about_title');
+        foreach ([
+            'about_hero_title',
+            'about_hero_subtitle',
+            'about_hero_kicker',
+            'about_hero_note_title',
+            'about_hero_note_text',
+            'about_story_kicker',
+            'about_mission',
+            'about_mission_label',
+            'about_vision',
+            'about_vision_label',
+            'about_impact_kicker',
+            'about_impact_title',
+            'about_impact_items',
+            'about_values_kicker',
+            'about_values_title',
+            'about_values_items',
+            'about_coverage_kicker',
+            'about_coverage_title',
+            'about_coverage_text',
+            'about_coverage_tags',
+            'about_coverage_map_title',
+            'about_coverage_map_text',
+            'about_milestones_kicker',
+            'about_milestones_title',
+            'about_milestones_items',
+            'about_team_kicker',
+            'about_team_title',
+            'about_team_empty_title',
+            'about_team_empty_text',
+            'about_trust_kicker',
+            'about_trust_title',
+            'about_trust_text',
+            'about_privacy_cta',
+            'about_primary_cta',
+            'about_secondary_cta',
+        ] as $key) {
+            $this->update_data($request, $key);
+        }
+
+        if ($request->hasFile('about_hero_image')) {
+            $aboutHeroImage = DataSetting::firstOrNew([
+                'key' => 'about_hero_image',
+                'type' => 'admin_landing_page',
+            ]);
+            $aboutHeroImage->value = Helpers::update(
+                'about_hero_image/',
+                $aboutHeroImage?->value,
+                $request->file('about_hero_image')->getClientOriginalExtension(),
+                $request->file('about_hero_image')
+            );
+            $aboutHeroImage->save();
+        }
         Toastr::success(translate('messages.about_us_updated'));
 
         return back();

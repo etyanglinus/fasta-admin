@@ -7,7 +7,17 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@hasSection('title')@yield('title') - {{ config('app.name', 'Laravel') }}@else{{ config('app.name', 'Laravel') }}@endif</title>
+    @hasSection('meta_description')
+        <meta name="description" content="@yield('meta_description')">
+        <meta property="og:description" content="@yield('meta_description')">
+    @endif
+    @hasSection('title')
+        <meta property="og:title" content="@yield('title') - {{ config('app.name', 'Laravel') }}">
+    @else
+        <meta property="og:title" content="{{ config('app.name', 'Laravel') }}">
+    @endif
+    <meta property="og:site_name" content="{{ config('app.name', 'Laravel') }}">
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>

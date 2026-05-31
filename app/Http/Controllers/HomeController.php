@@ -12,12 +12,15 @@ use App\Models\AdminFeature;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
+use App\Models\Page;
+use App\Models\TeamMember;
 use App\Models\AdminTestimonial;
 use Gregwar\Captcha\CaptchaBuilder;
 use App\Models\AdminSpecialCriteria;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use App\Models\AdminPromotionalBanner;
 use App\Models\DeliverymanLoyaltyPointHistory;
@@ -206,8 +209,17 @@ class HomeController extends Controller
         return $data;
     }
 
+    private function resolveCmsPage(string $slug)
+    {
+        return Page::where('slug', $slug)->where('status', 1)->first();
+    }
+
     public function terms_and_conditions(Request $request)
     {
+        if ($page = $this->resolveCmsPage('terms-and-conditions')) {
+            return view('page', compact('page'));
+        }
+
         $data = self::get_settings('terms_and_conditions');
         $config = Helpers::get_business_settings('landing_page');
         $landing_integration_type = Helpers::get_business_data('landing_integration_type');
@@ -226,15 +238,63 @@ class HomeController extends Controller
 
     public function about_us(Request $request)
     {
-        $data = self::get_settings('about_us');
-        $data_title = self::get_settings('about_title');
+        $page = $this->resolveCmsPage('about-us');
+        $data = $page?->content ?: self::get_settings('about_us');
+        $data_title = $page?->title ?: self::get_settings('about_title');
+        $aboutHeroImage = DataSetting::withoutGlobalScope('translate')
+            ->where('type', 'admin_landing_page')
+            ->where('key', 'about_hero_image')
+            ->first();
+        $about = [
+            'hero_kicker' => self::get_settings('about_hero_kicker') ?: 'Built for Kenya',
+            'hero_title' => self::get_settings('about_hero_title') ?: 'Empowering local commerce in Kenya, one delivery at a time.',
+            'hero_subtitle' => self::get_settings('about_hero_subtitle') ?: 'We connect Nairobi households with trusted vendors, fresh essentials, and dependable delivery partners so local businesses can grow faster and customers can shop with confidence.',
+            'hero_note_title' => self::get_settings('about_hero_note_title') ?: 'Nairobi first.',
+            'hero_note_text' => self::get_settings('about_hero_note_text') ?: 'Designed around real traffic, local vendors, and everyday Kenyan shopping needs.',
+            'story_kicker' => self::get_settings('about_story_kicker') ?: 'Our Story',
+            'mission_label' => self::get_settings('about_mission_label') ?: 'Mission',
+            'mission' => self::get_settings('about_mission') ?: 'Make daily commerce easier by giving Kenyan customers reliable access to nearby vendors and essentials.',
+            'vision_label' => self::get_settings('about_vision_label') ?: 'Vision',
+            'vision' => self::get_settings('about_vision') ?: 'A hyperlocal marketplace that helps African cities move smarter, waste less, and grow local businesses.',
+            'impact_kicker' => self::get_settings('about_impact_kicker') ?: 'Our Impact',
+            'impact_title' => self::get_settings('about_impact_title') ?: 'Built around useful outcomes, not empty scale.',
+            'impact_items' => self::get_settings('about_impact_items') ?: "Local vendors|Helping supermarkets, food businesses, and SMEs reach more nearby customers.\nNairobi & beyond|Starting with dense urban needs and expanding carefully into new service areas.\nFreshness first|Shorter delivery windows help reduce waste and protect product quality.\nInclusive growth|Creating room for women-led businesses, local brands, and delivery partners.",
+            'values_kicker' => self::get_settings('about_values_kicker') ?: 'Our Values',
+            'values_title' => self::get_settings('about_values_title') ?: 'The standards we want every order to feel like.',
+            'values_items' => self::get_settings('about_values_items') ?: "Reliability|Clear availability, fair timelines, and consistent delivery experiences.\nLocal Empowerment|Tools that help Kenyan vendors sell online without losing their neighborhood identity.\nSustainability|Smarter routing, fresh inventory movement, and less avoidable food waste.\nInnovation|Practical technology for real city constraints, from traffic to payment preferences.\nCustomer Obsession|Every product, update, and support decision starts with customer trust.",
+            'coverage_kicker' => self::get_settings('about_coverage_kicker') ?: 'Coverage',
+            'coverage_title' => self::get_settings('about_coverage_title') ?: 'Growing from Nairobi with disciplined expansion.',
+            'coverage_text' => self::get_settings('about_coverage_text') ?: 'Our coverage model is built around density, vendor quality, and delivery reliability. We would rather launch a service area well than overpromise on reach.',
+            'coverage_tags' => self::get_settings('about_coverage_tags') ?: "Nairobi\nFresh goods\nSME vendors\nPlanned expansion",
+            'coverage_map_title' => self::get_settings('about_coverage_map_title') ?: 'Nairobi',
+            'coverage_map_text' => self::get_settings('about_coverage_map_text') ?: 'Core service area',
+            'milestones_kicker' => self::get_settings('about_milestones_kicker') ?: 'Milestones',
+            'milestones_title' => self::get_settings('about_milestones_title') ?: 'A practical path toward trusted local commerce.',
+            'milestones_items' => self::get_settings('about_milestones_items') ?: "Validate customer demand around everyday essentials and fast-moving groceries.\nOnboard local vendors who can meet quality, availability, and fulfillment standards.\nStrengthen delivery operations for Nairobi traffic patterns and neighborhood density.\nExpand service areas based on reliability, not hype.",
+            'team_kicker' => self::get_settings('about_team_kicker') ?: 'Team',
+            'team_title' => self::get_settings('about_team_title') ?: 'Kenyan talent, logistics focus, and product discipline.',
+            'team_empty_title' => self::get_settings('about_team_empty_title') ?: 'A lean team with a big local mission.',
+            'team_empty_text' => self::get_settings('about_team_empty_text') ?: 'Add team members from the admin CMS to show photos, roles, bios, and LinkedIn links here.',
+            'trust_kicker' => self::get_settings('about_trust_kicker') ?: 'Trust',
+            'trust_title' => self::get_settings('about_trust_title') ?: 'Built for confidence.',
+            'trust_text' => self::get_settings('about_trust_text') ?: "We take vendor quality, customer support, payment security, and responsible data handling seriously, including alignment with Kenya's Data Protection Act where applicable.",
+            'privacy_cta' => self::get_settings('about_privacy_cta') ?: 'Read privacy policy',
+            'primary_cta' => self::get_settings('about_primary_cta') ?: 'Partner with us',
+            'secondary_cta' => self::get_settings('about_secondary_cta') ?: 'Join our team',
+            'hero_image' => $aboutHeroImage?->value
+                ? Helpers::get_full_url('about_hero_image', $aboutHeroImage->value, $aboutHeroImage->storage[0]?->value ?? 'public', 'aspect_1')
+                : asset('public/assets/landing/img/venture/venture1.png'),
+        ];
+        $teamMembers = Schema::hasTable('team_members')
+            ? TeamMember::where('status', 1)->orderBy('display_order')->orderBy('id')->get()
+            : collect();
 
         $config = Helpers::get_business_settings('landing_page');
         $landing_integration_type = Helpers::get_business_data('landing_integration_type');
         $redirect_url = Helpers::get_business_data('landing_page_custom_url');
 
         if (isset($config) && $config) {
-            return view('about-us', compact('data', 'data_title'));
+            return view('about-us', compact('data', 'data_title', 'about', 'teamMembers'));
         } elseif ($landing_integration_type == 'file_upload' && File::exists('resources/views/layouts/landing/custom/index.blade.php')) {
             return view('layouts.landing.custom.index');
         } elseif ($landing_integration_type == 'url') {
@@ -310,6 +370,10 @@ class HomeController extends Controller
 
     public function privacy_policy(Request $request)
     {
+        if ($page = $this->resolveCmsPage('privacy-policy')) {
+            return view('page', compact('page'));
+        }
+
         $data = self::get_settings('privacy_policy');
 
         $config = Helpers::get_business_settings('landing_page');
@@ -329,6 +393,10 @@ class HomeController extends Controller
 
     public function refund_policy(Request $request)
     {
+        if ($page = $this->resolveCmsPage('refund')) {
+            return view('page', compact('page'));
+        }
+
         $data = self::get_settings('refund_policy');
         $status = self::get_settings_status('refund_policy_status');
         abort_if($status == 0, 404);
@@ -349,6 +417,10 @@ class HomeController extends Controller
 
     public function shipping_policy(Request $request)
     {
+        if ($page = $this->resolveCmsPage('shipping-policy')) {
+            return view('page', compact('page'));
+        }
+
         $data = self::get_settings('shipping_policy');
         $status = self::get_settings_status('shipping_policy_status');
 
@@ -370,6 +442,10 @@ class HomeController extends Controller
 
     public function cancelation(Request $request)
     {
+        if ($page = $this->resolveCmsPage('cancelation')) {
+            return view('page', compact('page'));
+        }
+
         $data = self::get_settings('cancellation_policy');
         $status = self::get_settings_status('cancellation_policy_status');
         abort_if($status == 0, 404);
