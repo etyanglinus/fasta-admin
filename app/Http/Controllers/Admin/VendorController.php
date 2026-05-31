@@ -83,7 +83,7 @@ class VendorController extends Controller
                 }, ],
             'zone_id' => 'required',
             'micro_zone_id' => 'nullable|exists:micro_zones,id',
-            'logo' => 'required|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'logo' => 'required|image|max:2048|dimensions:width=500,height=500|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
             'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
 
         ], [
@@ -91,6 +91,10 @@ class VendorController extends Controller
             'name.0.required' => translate('default_name_is_required'),
             'address.0.required' => translate('default_address_is_required'),
         ]);
+
+        if ($request->hasFile('logo') && ! $this->hasPlainLightBackground($request->file('logo'))) {
+            $validator->getMessageBag()->add('logo', translate('messages.logo_must_have_a_plain_white_background'));
+        }
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
@@ -163,6 +167,37 @@ class VendorController extends Controller
         return response()->json(['message' => translate('messages.store_added_successfully'), 'redirect' => route('admin.store.list')]);
     }
 
+    private function hasPlainLightBackground($file): bool
+    {
+        if (! function_exists('imagecreatefromstring')) {
+            return true;
+        }
+
+        $image = @imagecreatefromstring(file_get_contents($file->getRealPath()));
+        if (! $image) {
+            return false;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $points = [[0, 0], [$width - 1, 0], [0, $height - 1], [$width - 1, $height - 1], [10, 10], [$width - 11, 10], [10, $height - 11], [$width - 11, $height - 11]];
+
+        foreach ($points as [$x, $y]) {
+            $rgb = imagecolorat($image, max(0, $x), max(0, $y));
+            $r = ($rgb >> 16) & 0xFF;
+            $g = ($rgb >> 8) & 0xFF;
+            $b = $rgb & 0xFF;
+
+            if ($r < 235 || $g < 235 || $b < 235 || (max($r, $g, $b) - min($r, $g, $b)) > 18) {
+                imagedestroy($image);
+                return false;
+            }
+        }
+
+        imagedestroy($image);
+        return true;
+    }
+
     public function edit($id)
     {
         if (getEnvMode() == 'demo' && $id == 2) {
@@ -198,13 +233,17 @@ class VendorController extends Controller
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
             'delivery_time_type' => 'required',
-            'logo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'logo' => 'nullable|image|max:2048|dimensions:width=500,height=500|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
             'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'name.0.required' => translate('default_name_is_required'),
             'address.0.required' => translate('default_address_is_required'),
         ]);
+
+        if ($request->hasFile('logo') && ! $this->hasPlainLightBackground($request->file('logo'))) {
+            $validator->getMessageBag()->add('logo', translate('messages.logo_must_have_a_plain_white_background'));
+        }
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);

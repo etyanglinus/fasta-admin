@@ -37,6 +37,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
 use App\Exports\StoreOrderlistExport;
 use App\Models\OrderPayment;
+use App\Models\OrderRouteLog;
 use App\Models\ParcelCancellationReason;
 use Illuminate\Support\Facades\Config;
 use MatanYadaev\EloquentSpatial\Objects\Point;
@@ -44,6 +45,20 @@ use MatanYadaev\EloquentSpatial\Objects\Point;
 class OrderController extends Controller
 {
     use PlaceNewOrder;
+
+    public function route_logs($id)
+    {
+        $logs = OrderRouteLog::where('order_id', $id)
+            ->orderBy('recorded_at')
+            ->get(['id', 'order_id', 'delivery_man_id', 'event_type', 'latitude', 'longitude', 'accuracy', 'heading', 'speed', 'recorded_at', 'metadata']);
+
+        return response()->json([
+            'order_id' => (int) $id,
+            'total' => $logs->count(),
+            'events' => $logs,
+        ]);
+    }
+
     public function list($status, Request $request)
     {
         $key = explode(' ', $request['search']);

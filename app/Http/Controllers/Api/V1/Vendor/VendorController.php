@@ -187,6 +187,59 @@ class VendorController extends Controller
         return response()->json(['message' => $store->active?translate('messages.store_opened'):translate('messages.store_temporarily_closed')], 200);
     }
 
+    public function update_custom_domain(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:191',
+                'regex:/^(?!https?:\/\/)(?!www\.)[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i',
+                \Illuminate\Validation\Rule::unique('stores', 'custom_domain')->ignore($request->vendor->stores[0]->id),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $store = $request->vendor->stores[0];
+        $store->custom_domain = $request->custom_domain ? \Illuminate\Support\Str::lower(trim($request->custom_domain)) : null;
+        $store->save();
+
+        return response()->json([
+            'message' => translate('messages.updated_successfully'),
+            'custom_domain' => $store->custom_domain,
+            'status' => $store->custom_domain ? 'pending_dns' : 'not_set',
+            'instructions' => $store->custom_domain ? 'Point your domain CNAME/A record to fastadeliveries.nobo.co.ke, then open the domain to confirm it redirects to your catalog.' : null,
+        ], 200);
+    }
+
+    public function store_visits(Request $request)
+    {
+        $storeId = $request->vendor->stores[0]->id;
+        $from = $request->from ? \Carbon\Carbon::parse($request->from)->startOfDay() : now()->subDays(13)->startOfDay();
+        $to = $request->to ? \Carbon\Carbon::parse($request->to)->endOfDay() : now()->endOfDay();
+
+        $logs = \App\Models\StoreVisitLog::where('store_id', $storeId)
+            ->whereBetween('visit_date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('visit_date')
+            ->get();
+
+        return response()->json([
+            'total_visits' => $logs->sum('visit_count'),
+            'today_visits' => $logs->where('visit_date', now()->toDateString())->sum('visit_count'),
+            'source_totals' => $logs->groupBy('source')->map->sum('visit_count'),
+            'daily' => $logs->groupBy(fn ($log) => $log->visit_date->format('Y-m-d'))->map(fn ($day, $date) => [
+                'date' => $date,
+                'total' => $day->sum('visit_count'),
+                'app' => $day->where('source', 'app')->sum('visit_count'),
+                'web' => $day->where('source', 'web')->sum('visit_count'),
+                'custom_domain' => $day->where('source', 'custom_domain')->sum('visit_count'),
+            ])->values(),
+        ], 200);
+    }
+
     // public function verifiedBadgePopupSeen(Request $request)
     // {
     //     $store = $request->vendor->stores[0];

@@ -24,12 +24,16 @@ class SocialAuthController extends Controller
 {
     public function social_register(Request $request)
     {
+        if ($request['medium'] === 'facebook') {
+            return response()->json(['error' => 'Facebook login has been removed.'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'token' => 'required',
             'unique_id' => 'required',
-            'email' => 'required_if:medium,google,facebook|unique:users,email',
+            'email' => 'required_if:medium,google|unique:users,email',
             'phone' => 'required|unique:users,phone',
-            'medium' => 'required|in:google,facebook,apple',
+            'medium' => 'required|in:google,apple',
         ]);
 
         if ($validator->fails()) {
@@ -49,9 +53,6 @@ class SocialAuthController extends Controller
                     $res = $client->request('GET',  'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' . $token);
                 }
 
-                $data = json_decode($res->getBody()->getContents(), true);
-            } elseif ($request['medium'] == 'facebook') {
-                $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'apple') {
                 $user = User::where('temp_token', $unique_id)->first();
@@ -448,11 +449,15 @@ class SocialAuthController extends Controller
 
     public function social_login(Request $request)
     {
+        if ($request['medium'] === 'facebook') {
+            return response()->json(['error' => 'Facebook login has been removed.'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'token' => 'required',
             'unique_id' => 'required',
-            'email' => 'required_if:medium,google,facebook',
-            'medium' => 'required|in:google,facebook,apple',
+            'email' => 'required_if:medium,google',
+            'medium' => 'required|in:google,apple',
         ]);
 
         if ($validator->fails()) {
@@ -470,9 +475,6 @@ class SocialAuthController extends Controller
                 } else{
                     $res = $client->request('GET',  'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' . $token);
                 }
-                $data = json_decode($res->getBody()->getContents(), true);
-            } elseif ($request['medium'] == 'facebook') {
-                $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
                 $data = json_decode($res->getBody()->getContents(), true);
             } elseif ($request['medium'] == 'apple') {
                 $apple_login_data=\App\Models\BusinessSetting::where(['key'=>'apple_login'])->first();

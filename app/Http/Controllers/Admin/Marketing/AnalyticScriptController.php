@@ -100,10 +100,10 @@ class AnalyticScriptController extends Controller
             ],
             [
                 'key' => 'twitter_tag',
-                'title' => 'X (Twitter) Pixel',
+                'title' => 'X Pixel',
                 'placeholder' => 'Enter_the_Pixel_ID',
                 'modal' => 'modalForTwitterPixel',
-                'icon' => 'twitter.svg',
+                'icon' => 'x.svg',
             ],
         ];
         return $analyticsTools;

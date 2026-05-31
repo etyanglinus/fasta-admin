@@ -2123,7 +2123,7 @@ class BusinessSettingsController extends Controller
     {
         $data = BusinessSetting::where('key', 'social_login')->first();
         if (!$data) {
-            Helpers::insert_business_settings_key('social_login', '[{"login_medium":"google","client_id":"","client_secret":"","status":"0"},{"login_medium":"facebook","client_id":"","client_secret":"","status":""}]');
+            Helpers::insert_business_settings_key('social_login', '[{"login_medium":"google","client_id":"","client_secret":"","status":"0"}]');
             $data = BusinessSetting::where('key', 'social_login')->first();
         }
         $apple = BusinessSetting::where('key', 'apple_login')->first();
@@ -2132,13 +2132,21 @@ class BusinessSettingsController extends Controller
             $apple = BusinessSetting::where('key', 'apple_login')->first();
         }
         $appleLoginServices = json_decode($apple->value, true);
-        $socialLoginServices = json_decode($data->value, true);
+        $socialLoginServices = array_values(array_filter(json_decode($data->value, true), function ($service) {
+            return ($service['login_medium'] ?? null) !== 'facebook';
+        }));
 
         return view('admin-views.business-settings.social-login.view', compact('socialLoginServices', 'appleLoginServices'));
     }
 
     public function updateSocialLogin($service, Request $request)
     {
+        if ($service === 'facebook') {
+            Toastr::error(translate('messages.facebook_login_has_been_removed'));
+
+            return redirect()->back();
+        }
+
         $login_setup_status = Helpers::get_business_settings($service . '_login_status') ?? 0;
         if ($login_setup_status && ($request['status'] == 0)) {
             Toastr::warning(translate($service . '_login_status_is_enabled_in_login_setup._First_disable_from_login_setup.'));
@@ -2212,11 +2220,12 @@ class BusinessSettingsController extends Controller
             'otp_login_status',
             'social_login_status',
             'google_login_status',
-            'facebook_login_status',
             'apple_login_status',
             'email_verification_status',
             'phone_verification_status',
         ])->get(['key', 'value'])->toArray(), 'value', 'key');
+
+        $data['facebook_login_status'] = 0;
 
         return view('admin-views.login-setup.login_page', compact('data'));
     }
@@ -2252,13 +2261,13 @@ class BusinessSettingsController extends Controller
         }
 
         if (!$request['manual_login_status'] && !$request['otp_login_status'] && $request['social_login_status']) {
-            if (!$request['google_login_status'] && !$request['facebook_login_status']) {
+            if (!$request['google_login_status']) {
                 Session::flash('select-one-method-android', true);
 
                 return back();
             }
         }
-        if ($request['social_login_status'] && !$request['google_login_status'] && !$request['facebook_login_status'] && !$request['apple_login_status']) {
+        if ($request['social_login_status'] && !$request['google_login_status'] && !$request['apple_login_status']) {
             Session::flash('select-one-method-social-login', true);
 
             return back();
@@ -2266,12 +2275,6 @@ class BusinessSettingsController extends Controller
 
         if (($request['social_login_status'] && $request['google_login_status'] && !isset($social_login['google'])) || ($request['social_login_status'] && ($request['google_login_status'] && isset($social_login['google'])) && !$social_login['google'])) {
             Session::flash('setup-google', true);
-
-            return back();
-        }
-
-        if (($request['social_login_status'] && $request['facebook_login_status'] && !isset($social_login['facebook'])) || ($request['social_login_status'] && ($request['facebook_login_status'] && isset($social_login['facebook'])) && !$social_login['facebook'])) {
-            Session::flash('setup-facebook', true);
 
             return back();
         }
@@ -2311,7 +2314,7 @@ class BusinessSettingsController extends Controller
         ]);
 
         Helpers::businessUpdateOrInsert(['key' => 'facebook_login_status'], [
-            'value' => $request['social_login_status'] ? ($request['facebook_login_status'] ? 1 : 0) : 0,
+            'value' => 0,
         ]);
 
         Helpers::businessUpdateOrInsert(['key' => 'apple_login_status'], [

@@ -37,6 +37,7 @@ use App\Models\DisbursementWithdrawalMethod;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderPayment;
+use App\Models\OrderRouteLog;
 use App\Models\OrderTransaction;
 use App\Models\ParcelCancellation;
 use App\Models\ParcelReturnFees;
@@ -599,6 +600,8 @@ class DeliverymanController extends Controller
         $order->accepted = now();
         $order->save();
 
+        $this->logOrderRouteEvent($order, $dm, 'accepted', $request);
+
         $dm->current_orders = $dm->current_orders + 1;
         $dm->save();
 
@@ -627,6 +630,15 @@ class DeliverymanController extends Controller
 
     public function record_location_data(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'order_id' => 'nullable|exists:orders,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
         $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
         DeliveryHistory::updateOrCreate(['delivery_man_id' => $dm['id']], [
             'longitude' => $request['longitude'],
@@ -636,6 +648,16 @@ class DeliverymanController extends Controller
             'created_at' => now(),
             'updated_at' => now()
         ]);
+
+        $order = Order::where('delivery_man_id', $dm->id)
+            ->when($request->filled('order_id'), fn ($query) => $query->where('id', $request->order_id))
+            ->whereNotIn('order_status', ['delivered', 'canceled', 'failed', 'refunded'])
+            ->latest('accepted')
+            ->first();
+
+        if ($order) {
+            $this->logOrderRouteEvent($order, $dm, 'location', $request);
+        }
 
         if(addon_published_status('RideShare') && $dm->is_ride == 1){
             if(isset($request['zone_id']) && ($request['zone_id'] != null)) {
@@ -766,6 +788,7 @@ class DeliverymanController extends Controller
                     ],
                 ], data_get($cancel_parcel_order, 'status_code'));
             } else {
+                $this->logOrderRouteEvent($order, $dm, 'canceled', $request, ['reason' => $request->reason]);
                 return response()->json(['message' => translate('messages.Parcel_canceled_successfully')], 200);
             }
         }
@@ -907,9 +930,38 @@ class DeliverymanController extends Controller
         $order[$request['status']] = now();
         $order->save();
 
+        $this->logOrderRouteEvent($order, $dm, $request['status'], $request, [
+            'reason' => $request->reason,
+            'proof_count' => is_array($request->file('order_proof')) ? count($request->file('order_proof')) : 0,
+        ]);
+
         Helpers::send_order_notification($order);
 
         return response()->json(['message' => translate('Status updated')], 200);
+    }
+
+    private function logOrderRouteEvent(Order $order, DeliveryMan $dm, string $eventType, Request $request, array $metadata = []): void
+    {
+        try {
+            OrderRouteLog::create([
+                'order_id' => $order->id,
+                'delivery_man_id' => $dm->id,
+                'event_type' => $eventType,
+                'latitude' => $request->input('latitude', $request->input('lat')),
+                'longitude' => $request->input('longitude', $request->input('lng')),
+                'accuracy' => $request->input('accuracy'),
+                'heading' => $request->input('heading'),
+                'speed' => $request->input('speed'),
+                'recorded_at' => now(),
+                'metadata' => array_filter([
+                    'location' => $request->input('location'),
+                    'status' => $request->input('status'),
+                    'device' => $request->header('User-Agent'),
+                ] + $metadata),
+            ]);
+        } catch (\Throwable $exception) {
+            info('Order route log failed: '.$exception->getMessage());
+        }
     }
 
     public function get_order_details(Request $request)

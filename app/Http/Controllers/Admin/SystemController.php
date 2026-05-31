@@ -124,6 +124,60 @@ class SystemController extends Controller
         return response()->json(['message' => translate('Maintenance is on.')]);
     }
 
+    public function platform_maintenance_update(Request $request)
+    {
+        $validated = $request->validate([
+            'target' => 'required|in:all,user_app,user_react_web,vendor_web,vendor_app,deliveryman_app',
+            'status' => 'required|boolean',
+            'until' => 'nullable|date',
+            'message' => 'nullable|string|max:500',
+            'notify' => 'nullable|boolean',
+        ]);
+
+        $defaults = [
+            'status' => false,
+            'until' => null,
+            'message' => 'Fasta Deliveries is under maintenance. Please try again shortly.',
+        ];
+
+        $setting = BusinessSetting::firstOrNew(['key' => 'platform_maintenance']);
+        $maintenance = json_decode($setting->value ?: '[]', true) ?: [];
+        foreach (['all', 'user_app', 'user_react_web', 'vendor_web', 'vendor_app', 'deliveryman_app'] as $target) {
+            $maintenance[$target] = array_merge($defaults, $maintenance[$target] ?? []);
+        }
+
+        $maintenance[$validated['target']] = [
+            'status' => (bool) $validated['status'],
+            'until' => $validated['until'] ?? null,
+            'message' => $validated['message'] ?: $defaults['message'],
+        ];
+
+        $setting->value = json_encode($maintenance);
+        $setting->save();
+
+        if ($request->boolean('notify')) {
+            $payload = [
+                'title' => 'Fasta Deliveries maintenance',
+                'description' => $maintenance[$validated['target']]['message'],
+                'type' => 'maintenance',
+                'target' => $validated['target'],
+                'until' => $maintenance[$validated['target']]['until'],
+            ];
+
+            try {
+                Helpers::send_push_notif_to_topic($payload, 'maintenance', 'maintenance');
+                Helpers::send_push_notif_to_topic($payload, $validated['target'].'_maintenance', 'maintenance');
+            } catch (\Throwable $exception) {
+                info('Maintenance notification failed: '.$exception->getMessage());
+            }
+        }
+
+        return response()->json([
+            'message' => translate('Maintenance settings updated'),
+            'data' => $maintenance,
+        ]);
+    }
+
     public function landing_page()
     {
         $landing_page = BusinessSetting::where('key', 'landing_page')->first();

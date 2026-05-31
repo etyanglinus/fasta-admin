@@ -95,8 +95,9 @@
                             html += '<tr>';
                             html += '<td class="column_name" data-column_name="sl" data-id="' + data[count].id +
                                 '">' + (count + 1) + '</td>';
+                            let displayName = data[count].name === 'twitter' ? 'X' : data[count].name;
                             html += '<td class="column_name" data-column_name="name" data-id="' + data[count]
-                                .id + '">' + data[count].name + '</td>';
+                                .id + '">' + displayName + '</td>';
                             html += '<td class="column_name" data-column_name="slug" data-id="' + data[count]
                                 .id + '">' + data[count].link + '</td>';
                             html += `<td class="column_name" data-column_name="status" data-id="${data[count].id}">

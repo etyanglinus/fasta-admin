@@ -63,7 +63,7 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
                         <img src="{{asset('/public/assets/admin/img/img/instagram.png')}}" alt="">
                     </a>
                     <a href="" id="twitter-check" class="email-template-social-media" style="{{ (isset($data['twitter']) && $data['twitter'] == 1)?'':'display:none;' }}">
-                        <img src="{{asset('/public/assets/admin/img/img/twitter.png')}}" alt="">
+                        <img src="{{asset('/public/assets/admin/img/img/x.svg')}}" alt="">
                     </a>
                     <a href="" id="linkedin-check" class="email-template-social-media" style="{{ (isset($data['linkedin']) && $data['linkedin'] == 1)?'':'display:none;' }}">
                         <img src="{{asset('/public/assets/admin/img/img/linkedin.png')}}" alt="">
@@ -73,7 +73,7 @@ $company_name = App\Models\BusinessSetting::where('key', 'business_name')->first
                     </a>
                 </span>
                 <span class="copyright" id="mail-copyright">
-                    {{ $data['copyright_text']?? translate('Copyright 2023 Fasta Deliveries. All right reserved') }}
+                    {{ $data['copyright_text']?? '© 2026 Fasta Deliveries. All rights reserved.' }}
                 </span>
             </td>
         </tr>

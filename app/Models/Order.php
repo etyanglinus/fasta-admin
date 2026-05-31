@@ -218,6 +218,11 @@ class Order extends Model
         return $this->hasMany(DeliveryHistory::class, 'order_id');
     }
 
+    public function route_logs()
+    {
+        return $this->hasMany(OrderRouteLog::class, 'order_id');
+    }
+
     public function dm_last_location()
     {
         // return $this->hasOne(DeliveryHistory::class, 'order_id')->latest();

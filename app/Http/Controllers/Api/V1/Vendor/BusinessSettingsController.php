@@ -16,10 +16,14 @@ class BusinessSettingsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'contact_number' => 'required|string|max:20',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|image|max:2048|dimensions:width=500,height=500',
             'cover_photo' => 'nullable|image|max:2048',
             'meta_title' => 'max:100',
         ]);
+
+        if ($request->hasFile('logo') && ! $this->hasPlainLightBackground($request->file('logo'))) {
+            $validator->getMessageBag()->add('logo', translate('messages.logo_must_have_a_plain_white_background'));
+        }
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
@@ -66,6 +70,37 @@ class BusinessSettingsController extends Controller
         }
 
         return response()->json(['message' => translate('messages.store_basic_info_updated')], 200);
+    }
+
+    private function hasPlainLightBackground($file): bool
+    {
+        if (! function_exists('imagecreatefromstring')) {
+            return true;
+        }
+
+        $image = @imagecreatefromstring(file_get_contents($file->getRealPath()));
+        if (! $image) {
+            return false;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $points = [[0, 0], [$width - 1, 0], [0, $height - 1], [$width - 1, $height - 1], [10, 10], [$width - 11, 10], [10, $height - 11], [$width - 11, $height - 11]];
+
+        foreach ($points as [$x, $y]) {
+            $rgb = imagecolorat($image, max(0, $x), max(0, $y));
+            $r = ($rgb >> 16) & 0xFF;
+            $g = ($rgb >> 8) & 0xFF;
+            $b = $rgb & 0xFF;
+
+            if ($r < 235 || $g < 235 || $b < 235 || (max($r, $g, $b) - min($r, $g, $b)) > 18) {
+                imagedestroy($image);
+                return false;
+            }
+        }
+
+        imagedestroy($image);
+        return true;
     }
 
 

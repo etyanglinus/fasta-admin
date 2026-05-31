@@ -1024,7 +1024,7 @@
 
                 <li class="navbar-vertical-aside-has-menu {{Request::is('admin/social-login/view')?'active':''}}">
                 <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.social-login.view')}}">
-                    <i class="tio-twitter nav-icon"></i>
+                    <span class="nav-icon font-weight-bold">X</span>
                     <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                         {{translate('messages.social_login')}}
                     </span>

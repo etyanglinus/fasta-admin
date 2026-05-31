@@ -147,7 +147,7 @@ class VendorLoginController extends Controller
             'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'zone_id' => 'required',
             'module_id' => 'required',
-            'logo' => 'required|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'logo' => 'required|image|max:2048|dimensions:width=500,height=500|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
             'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
         ],[
             'password.required' => translate('The password is required'),
@@ -181,6 +181,10 @@ class VendorLoginController extends Controller
 
         if (count($data) < 1) {
             $validator->getMessageBag()->add('translations', translate('messages.Name and description in english is required'));
+        }
+
+        if ($request->hasFile('logo') && ! $this->hasPlainLightBackground($request->file('logo'))) {
+            $validator->getMessageBag()->add('logo', translate('messages.logo_must_have_a_plain_white_background'));
         }
 
         if ($validator->fails()) {
@@ -293,6 +297,37 @@ class VendorLoginController extends Controller
 
 
 
+
+    private function hasPlainLightBackground($file): bool
+    {
+        if (! function_exists('imagecreatefromstring')) {
+            return true;
+        }
+
+        $image = @imagecreatefromstring(file_get_contents($file->getRealPath()));
+        if (! $image) {
+            return false;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $points = [[0, 0], [$width - 1, 0], [0, $height - 1], [$width - 1, $height - 1], [10, 10], [$width - 11, 10], [10, $height - 11], [$width - 11, $height - 11]];
+
+        foreach ($points as [$x, $y]) {
+            $rgb = imagecolorat($image, max(0, $x), max(0, $y));
+            $r = ($rgb >> 16) & 0xFF;
+            $g = ($rgb >> 8) & 0xFF;
+            $b = $rgb & 0xFF;
+
+            if ($r < 235 || $g < 235 || $b < 235 || (max($r, $g, $b) - min($r, $g, $b)) > 18) {
+                imagedestroy($image);
+                return false;
+            }
+        }
+
+        imagedestroy($image);
+        return true;
+    }
 
     private function storeSubscriptionCheck($store, $vendor,$token){
         if ($store?->store_business_model == 'none') {

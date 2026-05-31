@@ -49,7 +49,7 @@
         <li>
             <label class="form-check form--check">
                 <input class="form-check-input twitter-check check-mail-element" type="checkbox" data-id="twitter-check" name="twitter" value="1" {{ (isset($data['twitter']) && $data['twitter'] == 1)?'checked':'' }}>
-                <span class="form-check-label">{{translate('Twitter')}}</span>
+                <span class="form-check-label">{{translate('X')}}</span>
             </label>
         </li>
         <li>

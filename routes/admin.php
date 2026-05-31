@@ -64,6 +64,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         Route::get('/', 'DashboardController@dashboard')->name('dashboard');
 
         Route::get('maintenance-mode', 'SystemController@maintenance_mode')->name('maintenance-mode');
+        Route::post('platform-maintenance', 'SystemController@platform_maintenance_update')->name('platform-maintenance.update');
         Route::get('landing-page', 'SystemController@landing_page')->name('landing-page');
 
         Route::group(['prefix' => 'parcel', 'as' => 'parcel.', 'middleware' => ['module:parcel']], function () {
@@ -295,6 +296,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         Route::group(['prefix' => 'order', 'as' => 'order.', 'middleware' => ['module:order']], function () {
             Route::get('list/{status}', 'OrderController@list')->name('list');
             Route::get('details/{id}', 'OrderController@details')->name('details');
+            Route::get('route-logs/{id}', 'OrderController@route_logs')->name('route-logs');
             Route::get('all-details/{id}', 'OrderController@all_details')->name('all-details');
 
             // Route::put('status-update/{id}', 'OrderController@status')->name('status-update');

@@ -45,6 +45,28 @@ class ConfigController extends Controller
         $this->map_api_key = $map_api_key_server;
     }
 
+    private function activePlatformMaintenance(): array
+    {
+        $defaults = [
+            'status' => false,
+            'until' => null,
+            'message' => 'Fasta Deliveries is under maintenance. Please try again shortly.',
+        ];
+
+        $raw = Helpers::get_business_settings('platform_maintenance');
+        $settings = is_array($raw) ? $raw : (json_decode($raw ?: '[]', true) ?: []);
+
+        foreach (['all', 'user_app', 'user_react_web', 'vendor_web', 'vendor_app', 'deliveryman_app'] as $target) {
+            $settings[$target] = array_merge($defaults, $settings[$target] ?? []);
+
+            if (! empty($settings[$target]['until']) && now()->greaterThan($settings[$target]['until'])) {
+                $settings[$target]['status'] = false;
+            }
+        }
+
+        return $settings;
+    }
+
     public function configuration()
     {
         $key = [
@@ -131,6 +153,10 @@ class ConfigController extends Controller
         }
         $social_login = [];
         foreach (Helpers::get_business_settings('social_login') as $social) {
+            if (($social['login_medium'] ?? null) === 'facebook') {
+                continue;
+            }
+
             $config = [
                 'login_medium' => $social['login_medium'],
                 'status' => (bool)$social['status'],
@@ -244,6 +270,7 @@ class ConfigController extends Controller
             'digital_payment_info' => $digital_payment_infos,
             'demo' => (bool)(getEnvMode() == 'demo' ? true : false),
             'maintenance_mode' => (bool)Helpers::get_business_settings('maintenance_mode') ?? 0,
+            'platform_maintenance' => $this->activePlatformMaintenance(),
             'order_confirmation_model' => config('order_confirmation_model'),
             'show_dm_earning' => (bool)$settings['show_dm_earning'],
             'canceled_by_deliveryman' => (bool)$settings['canceled_by_deliveryman'],
@@ -324,7 +351,7 @@ class ConfigController extends Controller
                 'otp_login_status' => (int)(isset($settings['otp_login_status']) ? $settings['otp_login_status'] : 0),
                 'social_login_status' => (int)(isset($settings['social_login_status']) ? $settings['social_login_status'] : 0),
                 'google_login_status' => (int)(isset($settings['google_login_status']) ? $settings['google_login_status'] : 0),
-                'facebook_login_status' => (int)(isset($settings['facebook_login_status']) ? $settings['facebook_login_status'] : 0),
+                'facebook_login_status' => 0,
                 'apple_login_status' => (int)(isset($settings['apple_login_status']) ? $settings['apple_login_status'] : 0),
                 'email_verification_status' => (int)(isset($settings['email_verification_status']) ? $settings['email_verification_status'] : 0),
                 'phone_verification_status' => (int)(isset($settings['phone_verification_status']) ? $settings['phone_verification_status'] : 0),
@@ -496,8 +523,13 @@ class ConfigController extends Controller
         if ($validator->errors()->count() > 0) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
-        $zones = Zone::with('modules')->whereContains('coordinates', new Point($request->lat, $request->lng, POINT_SRID))
-            ->selectRaw('zones.*, ABS(ST_Area(coordinates)) as area')->orderBy('area', 'asc')->latest()->get(['id', 'status', 'cash_on_delivery', 'digital_payment', 'offline_payment']);
+        $zones = Zone::with([
+                'modules',
+                'paymentGateways' => fn ($query) => $query->where('status', 1)->select('id', 'zone_id', 'gateway_key', 'status'),
+                'microZones' => fn ($query) => $query->active()->select('id', 'zone_id', 'name'),
+            ])
+            ->whereContains('coordinates', new Point($request->lat, $request->lng, POINT_SRID))
+            ->selectRaw('zones.*, ABS(ST_Area(coordinates)) as area')->orderBy('area', 'asc')->latest()->get();
         if (count($zones) < 1) {
             return response()->json([
                 'errors' => [

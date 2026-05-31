@@ -319,7 +319,7 @@
                     <div class="card-body p-20">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div class="">
-                                <h3 class="black-color mb-1 d-block">X (Twitter) Pixel</h3>
+                                <h3 class="black-color mb-1 d-block">X Pixel</h3>
                                 <p class="fs-12 text-c mb-1">To know more <a href="#0" class="theme-clr fs-12 font-semibold text-underline">Click Here.</a></p>
                             </div>
                             <div class="">

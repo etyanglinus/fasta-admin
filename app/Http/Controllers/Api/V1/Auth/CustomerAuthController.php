@@ -674,12 +674,15 @@ class CustomerAuthController extends Controller
         }
 
         if($request->login_type == 'social'){
+            if ($request['medium'] === 'facebook') {
+                return response()->json(['error' => 'Facebook login has been removed.'], 403);
+            }
 
             $validator = Validator::make($request->all(), [
                 'token' => 'required',
                 'unique_id' => 'required',
-                'email' => 'required_if:medium,google,facebook',
-                'medium' => 'required|in:google,facebook,apple',
+                'email' => 'required_if:medium,google',
+                'medium' => 'required|in:google,apple',
             ]);
 
             if ($validator->fails()) {
@@ -697,9 +700,6 @@ class CustomerAuthController extends Controller
                     } else{
                         $res = $client->request('GET', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' . $token);
                     }
-                    $data = json_decode($res->getBody()->getContents(), true);
-                } elseif ($request['medium'] == 'facebook') {
-                    $res = $client->request('GET', 'https://graph.facebook.com/' . $unique_id . '?access_token=' . $token . '&&fields=name,email');
                     $data = json_decode($res->getBody()->getContents(), true);
                 } elseif ($request['medium'] == 'apple') {
                     if($request->has('verified')){

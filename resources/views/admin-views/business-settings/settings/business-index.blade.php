@@ -24,6 +24,16 @@
 
             <div class="card mb-3" id="maintenance_mode_section">
                 <div class="card-body">
+                    @php($platformMaintenanceRaw = \App\CentralLogics\Helpers::get_business_settings('platform_maintenance'))
+                    @php($platformMaintenance = is_array($platformMaintenanceRaw) ? $platformMaintenanceRaw : (json_decode($platformMaintenanceRaw ?: '[]', true) ?: []))
+                    @php($maintenanceTargets = [
+                        'all' => translate('Entire public system'),
+                        'user_app' => translate('User app'),
+                        'user_react_web' => translate('User React web'),
+                        'vendor_web' => translate('Vendor web'),
+                        'vendor_app' => translate('Vendor app'),
+                        'deliveryman_app' => translate('Deliveryman app'),
+                    ])
                     <div class="row g-3">
                         <div class="col-xxl-9 col-lg-8 col-md-7 col-sm-6">
                             <div>
@@ -62,6 +72,52 @@
                                     </span>
                                 </label>
                             </div>
+                        </div>
+                    </div>
+                    <div class="border rounded mt-3 p-3 bg-light" id="platform-maintenance-section">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+                            <div>
+                                <h5 class="mb-1">{{ translate('Targeted maintenance') }}</h5>
+                                <p class="mb-0 fs-12 text-muted">{{ translate('Choose exactly which Fasta Deliveries systems should show the maintenance page. Admin panel stays available.') }}</p>
+                            </div>
+                            <label class="d-flex align-items-center gap-2 mb-0">
+                                <input type="checkbox" id="platform_maintenance_notify" value="1">
+                                <span class="fs-12">{{ translate('Notify via Firebase') }}</span>
+                            </label>
+                        </div>
+                        <div class="row g-3">
+                            @foreach($maintenanceTargets as $targetKey => $targetLabel)
+                                @php($target = array_merge([
+                                    'status' => false,
+                                    'until' => null,
+                                    'message' => 'Fasta Deliveries is under maintenance. Please try again shortly.',
+                                ], $platformMaintenance[$targetKey] ?? []))
+                                <div class="col-xl-6">
+                                    <div class="bg-white border rounded p-3 platform-maintenance-row" data-target="{{ $targetKey }}">
+                                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                            <h6 class="mb-0">{{ $targetLabel }}</h6>
+                                            <label class="toggle-switch toggle-switch-sm">
+                                                <input type="checkbox" class="toggle-switch-input platform-maintenance-status" {{ !empty($target['status']) ? 'checked' : '' }}>
+                                                <span class="toggle-switch-label text mb-0">
+                                                    <span class="toggle-switch-indicator"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label class="form-label fs-12">{{ translate('Ends at') }}</label>
+                                            <input type="datetime-local" class="form-control platform-maintenance-until"
+                                                value="{{ !empty($target['until']) ? \Carbon\Carbon::parse($target['until'])->format('Y-m-d\TH:i') : '' }}">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label class="form-label fs-12">{{ translate('Maintenance message') }}</label>
+                                            <textarea class="form-control platform-maintenance-message" rows="2">{{ $target['message'] ?? 'Fasta Deliveries is under maintenance. Please try again shortly.' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-primary" id="save-platform-maintenance">{{ translate('Save maintenance targets') }}</button>
                         </div>
                     </div>
                 </div>
@@ -1171,6 +1227,57 @@
 
     $(document).on("keydown", "input", function (e) {
         if (e.which === 13) e.preventDefault();
+    });
+
+    function syncPlatformMaintenanceVisibility() {
+        if ($('#maintenance_mode').is(':checked')) {
+            $('#platform-maintenance-section').slideDown(200);
+        } else {
+            $('#platform-maintenance-section').slideUp(200);
+        }
+    }
+
+    syncPlatformMaintenanceVisibility();
+
+    $('#maintenance_mode').on('change', function () {
+        syncPlatformMaintenanceVisibility();
+    });
+
+    $('#save-platform-maintenance').on('click', function () {
+        const button = $(this);
+        const originalText = button.text();
+        const notify = $('#platform_maintenance_notify').is(':checked') ? 1 : 0;
+        const requests = [];
+
+        button.prop('disabled', true).text('{{ translate('Saving') }}...');
+
+        $('.platform-maintenance-row').each(function () {
+            const row = $(this);
+            requests.push($.ajax({
+                url: '{{ route('admin.platform-maintenance.update') }}',
+                method: 'post',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    target: row.data('target'),
+                    status: row.find('.platform-maintenance-status').is(':checked') ? 1 : 0,
+                    until: row.find('.platform-maintenance-until').val(),
+                    message: row.find('.platform-maintenance-message').val(),
+                    notify: notify,
+                },
+            }));
+        });
+
+        $.when.apply($, requests)
+            .done(function () {
+                toastr.success('{{ translate('Maintenance settings updated') }}');
+            })
+            .fail(function (xhr) {
+                const message = xhr.responseJSON?.message || '{{ translate('Failed to update maintenance settings') }}';
+                toastr.error(message);
+            })
+            .always(function () {
+                button.prop('disabled', false).text(originalText);
+            });
     });
 
     // Business Model Validation

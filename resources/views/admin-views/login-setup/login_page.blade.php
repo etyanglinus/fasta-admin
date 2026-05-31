@@ -109,17 +109,6 @@
                                 <div class="col-sm-6 col-md-4">
                                     <label class="form-check form--check form--check--inline border rounded">
                                         <span class="user-select-none form-check-label flex-grow-1">
-                                            {{translate('Facebook')}}
-                                            <span data-toggle="tooltip" data-placement="top" title="" data-original-title="{{ translate('Enabling Facebook Login, customers can log in to the site using their existing Facebook credentials') }}">
-                                                <i class="tio-info-outined"></i>
-                                            </span>
-                                        </span>
-                                        <input type="checkbox" name="facebook_login_status" id="facebook_login_status" value="1" {{ (isset($data['facebook_login_status']) && $data['facebook_login_status'] == '1')? 'checked':'' }} class="form-check-input social-media-status-checkbox">
-                                    </label>
-                                </div>
-                                <div class="col-sm-6 col-md-4">
-                                    <label class="form-check form--check form--check--inline border rounded">
-                                        <span class="user-select-none form-check-label flex-grow-1">
                                             {{translate('Apple')}}
                                             <span data-toggle="tooltip" data-placement="top" title="" data-original-title="{{ translate('Enabling Apple Login, customers can log in to the site using their existing Apple login credentials, Only for Apple devices') }}">
                                                 <i class="tio-info-outined"></i>
@@ -235,7 +224,7 @@
                         <img src="{{asset('public/assets/admin/img/modal/package-status-disable.png')}}" alt="" class="mb-20">
                         <h5 class="modal-title">{{translate('Important Alert !')}}</h5>
                     </div>
-                    <p>{{ translate('If you are activating only social login as the login method, you must enable at least one option between Google and Facebook for Android users.') }}</p>
+                    <p>{{ translate('If you are activating only social login as the login method, you must enable Google login for Android users.') }}</p>
                 </div>
                 <div class="modal-footer justify-content-center border-0">
                     <a type="button" class="btn btn--primary mw-300px" data-dismiss="modal">{{translate('okay')}}</a>
@@ -256,7 +245,7 @@
                         <img src="{{asset('public/assets/admin/img/modal/package-status-disable.png')}}" alt="" class="mb-20">
                         <h5 class="modal-title">{{translate('Important Alert !')}}</h5>
                     </div>
-                    <p>{{ translate('If you are activating social login as the login method, you must enable at least one option between Google, Facebook & Apple.') }}</p>
+                    <p>{{ translate('If you are activating social login as the login method, you must enable at least one option between Google and Apple.') }}</p>
                 </div>
                 <div class="modal-footer justify-content-center border-0">
                     <a type="button" class="btn btn--primary mw-300px" data-dismiss="modal">{{translate('okay')}}</a>
@@ -282,28 +271,6 @@
                 </div>
                 <div class="modal-footer justify-content-center border-0">
                     <a type="button" class="btn btn--primary mw-300px" href="{{route('admin.business-settings.third-party.social-login.view')}}" target="_blank">{{translate('Go to Google Configuration')}}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="setup-facebook-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog status-warning-modal text-center">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body pb-0"><b></b>
-                    <div class="text-center mb-20">
-                        <img src="{{asset('public/assets/admin/img/modal/facebook.png')}}" alt="" class="mb-20">
-                        <h5 class="modal-title">{{translate('Set Up Facebook Configuration First')}}</h5>
-                    </div>
-                    <p>{{ translate('It looks like your Facebook Login configuration is not set up yet. To enable the Facebook Login option, please set up the Facebook configuration first.') }}</p>
-                </div>
-                <div class="modal-footer justify-content-center border-0">
-                    <a type="button" class="btn btn--primary mw-300px" href="{{route('admin.business-settings.third-party.social-login.view')}}" target="_blank">{{translate('Go to Facebook Configuration')}}</a>
                 </div>
             </div>
         </div>
@@ -393,9 +360,6 @@
             @endif
             @if (session('setup-google'))
             $('#setup-google-modal').modal('show');
-            @endif
-            @if (session('setup-facebook'))
-            $('#setup-facebook-modal').modal('show');
             @endif
             @if (session('setup-apple'))
             $('#setup-apple-modal').modal('show');

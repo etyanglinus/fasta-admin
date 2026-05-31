@@ -4514,6 +4514,10 @@ class Helpers
     {
 
         $data = self::getAdminNotificationSetupData();
+        $data = array_map(function ($item) {
+            $item['mail_status'] = 'active';
+            return $item;
+        }, $data);
         $data = NotificationSetting::upsert($data, ['key', 'type'], ['title', 'mail_status', 'sms_status', 'push_notification_status', 'sub_title']);
         return true;
     }
@@ -4521,6 +4525,10 @@ class Helpers
     public static function storeNotificationDataSetup($id)
     {
         $data = self::getStoreNotificationSetupData($id);
+        $data = array_map(function ($item) {
+            $item['mail_status'] = 'active';
+            return $item;
+        }, $data);
         $data = StoreNotificationSetting::upsert($data, ['key', 'store_id'], ['title', 'mail_status', 'sms_status', 'push_notification_status', 'sub_title']);
         return true;
     }
@@ -4528,6 +4536,10 @@ class Helpers
     public static function storeRentalNotificationDataSetup($id)
     {
         $data = self::getRentalStoreNotificationSetupData($id);
+        $data = array_map(function ($item) {
+            $item['mail_status'] = 'active';
+            return $item;
+        }, $data);
         $data = StoreNotificationSetting::upsert($data, ['key', 'store_id', 'module_type'], ['title', 'mail_status', 'sms_status', 'push_notification_status', 'sub_title']);
         return true;
     }
