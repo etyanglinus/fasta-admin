@@ -590,7 +590,11 @@ class POSController extends Controller
                     $query->where('starting_coverage_area', '>=', $distance_data);
                 });
             })
+            ->where(function ($query) use ($store) {
+                $query->whereNull('module_id')->orWhere('module_id', $store->module_id);
+            })
             ->active()
+                ->orderByRaw('module_id IS NULL')
                 ->orderBy('starting_coverage_area')->first();
 
             $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
@@ -816,13 +820,18 @@ class POSController extends Controller
         $self_delivery_status = $request->self_delivery_status;
         $extra_charges = 0;
         if($self_delivery_status != 1){
+        $store = Helpers::get_store_data();
         $data=  DMVehicle::where(function($query)use($distance_data) {
                 $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
             })
             ->orWhere(function ($query) use ($distance_data) {
                 $query->where('starting_coverage_area', '>=', $distance_data);
             })
+            ->where(function ($query) use ($store) {
+                $query->whereNull('module_id')->orWhere('module_id', $store?->module_id);
+            })
             ->active()
+            ->orderByRaw('module_id IS NULL')
             ->orderBy('starting_coverage_area')->first();
         }
             $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);

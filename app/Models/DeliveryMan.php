@@ -26,6 +26,7 @@ class DeliveryMan extends Authenticatable
 
     protected $casts = [
         'zone_id' => 'integer',
+        'micro_zone_id' => 'integer',
         'status'=>'boolean',
         'active'=>'integer',
         'available'=>'integer',
@@ -299,6 +300,11 @@ class DeliveryMan extends Authenticatable
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function microZone()
+    {
+        return $this->belongsTo(MicroZone::class);
     }
 
     public function reviews()

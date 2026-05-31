@@ -134,6 +134,15 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
+                                        <div class="form-group mb-0">
+                                            <label class="input-label">{{ translate('Micro Zone') }}</label>
+                                            <select name="micro_zone_id" class="form-control js-select2-custom micro-zone-select"
+                                                data-placeholder="{{ translate('Select micro zone') }}">
+                                                <option value="">{{ translate('Select micro zone') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
                                         <div class="form-group m-0">
                                             <label class="input-label"
                                                 for="exampleFormControlInput1">{{ translate('messages.Select Vehicle') }} <span
@@ -466,6 +475,29 @@
                 $('#ref_code').hide();
                 $('#referral_code').val('');
             }
+        });
+
+        function loadMicroZones(zoneId, selectedId) {
+            let target = $('.micro-zone-select');
+            target.html('<option value="">{{ translate('Select micro zone') }}</option>');
+            if (!zoneId) {
+                target.trigger('change');
+                return;
+            }
+            $.get({
+                url: '{{ route('admin.business-settings.zone.micro-zones.by-zone') }}',
+                data: { zone_id: zoneId },
+                success: function (data) {
+                    data.forEach(function (item) {
+                        target.append(new Option(item.name, item.id, false, String(item.id) === String(selectedId)));
+                    });
+                    target.trigger('change');
+                }
+            });
+        }
+
+        $('select[name="zone_id"]').on('change', function () {
+            loadMicroZones(this.value);
         });
 
         $(document).on('submit', 'form', function (e) {

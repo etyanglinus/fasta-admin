@@ -26,7 +26,10 @@ use MatanYadaev\EloquentSpatial\Objects\Point;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Contracts\Repositories\TranslationRepositoryInterface;
 use App\Models\Module;
+use App\Models\Currency;
+use App\Models\Setting;
 use App\Models\Zone as ZoneModel;
+use App\Models\ZonePaymentGateway;
 
 class ZoneController extends BaseController
 {
@@ -160,21 +163,35 @@ class ZoneController extends BaseController
     {
         $zone = $this->zoneRepo->getFirstWhere(
             params: ['id' => $id],
-            relations: ['modules']
+            relations: ['modules', 'paymentGateways']
         );
         $cash_on_delivery = Helpers::get_business_settings('cash_on_delivery');
         $digital_payment = Helpers::get_business_settings('digital_payment');
         $offline_payment = Helpers::get_business_settings('offline_payment_status');
+        $currencies = Currency::orderBy('currency_code')->get(['currency_code', 'currency_symbol', 'country']);
+        $paymentGateways = Setting::where('settings_type', 'payment_config')
+            ->where('is_active', 1)
+            ->get(['key_name', 'additional_data']);
+        $selectedPaymentGateways = $zone->paymentGateways->where('status', 1)->pluck('gateway_key')->toArray();
 
-        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment'));
+        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways'));
     }
 
     public function getLatestModuleSetupView(): View
     {
         $zone = $this->zoneRepo->getLatest(
-            relations: ['modules']
+            relations: ['modules', 'paymentGateways']
         );
-        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone'));
+        $cash_on_delivery = Helpers::get_business_settings('cash_on_delivery');
+        $digital_payment = Helpers::get_business_settings('digital_payment');
+        $offline_payment = Helpers::get_business_settings('offline_payment_status');
+        $currencies = Currency::orderBy('currency_code')->get(['currency_code', 'currency_symbol', 'country']);
+        $paymentGateways = Setting::where('settings_type', 'payment_config')
+            ->where('is_active', 1)
+            ->get(['key_name', 'additional_data']);
+        $selectedPaymentGateways = $zone?->paymentGateways?->where('status', 1)->pluck('gateway_key')->toArray() ?? [];
+
+        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways'));
     }
 
     public function updateModuleSetup(ZoneModuleUpdateRequest $request, $id): RedirectResponse
@@ -236,6 +253,15 @@ class ZoneController extends BaseController
             ->only($request->module_id)
             ->toArray();
         $this->zoneRepo->zoneModuleSetupUpdate(id: $id, data: $paymentData, moduleData: $filteredModuleData);
+        $this->zoneRepo->update(id: $id, data: ['currency_code' => $request->currency_code]);
+        ZonePaymentGateway::where('zone_id', $id)->delete();
+        foreach ($request->payment_gateways ?? [] as $gateway) {
+            ZonePaymentGateway::create([
+                'zone_id' => $id,
+                'gateway_key' => $gateway,
+                'status' => 1,
+            ]);
+        }
 
         Toastr::success(translate('messages.zone_module_updated_successfully'));
         return redirect()->route('admin.business-settings.zone.home');

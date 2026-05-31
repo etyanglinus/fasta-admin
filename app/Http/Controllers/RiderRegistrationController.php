@@ -95,6 +95,7 @@ class RiderRegistrationController extends Controller
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
             'zone_id' => 'required',
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
             // 'vehicle_id' => 'required',
             'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ], [
@@ -135,6 +136,7 @@ class RiderRegistrationController extends Controller
         $dm->identity_type = $request->identity_type;
         $dm->vehicle_id = $request->vehicle_id;
         $dm->zone_id = $request->zone_id;
+        $dm->micro_zone_id = $request->micro_zone_id;
         $dm->identity_image = $identity_image;
         $dm->image = $image_name;
         $dm->active = 0;

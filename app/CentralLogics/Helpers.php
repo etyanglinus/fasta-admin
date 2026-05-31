@@ -1736,7 +1736,7 @@ class Helpers
                 ],
                 "android" => [
                     "notification" => [
-                        "channelId" => '6ammart',
+                        "channelId" => 'fasta-deliveries',
                     ]
                 ],
                 "apns" => [
@@ -1801,7 +1801,7 @@ class Helpers
                     ],
                     "android" => [
                         "notification" => [
-                            "channelId" => '6ammart',
+                            "channelId" => 'fasta-deliveries',
                         ]
                     ],
                     "apns" => [
@@ -1833,7 +1833,7 @@ class Helpers
                     ],
                     "android" => [
                         "notification" => [
-                            "channelId" => '6ammart',
+                            "channelId" => 'fasta-deliveries',
                         ]
                     ],
                     "apns" => [
@@ -2598,12 +2598,37 @@ class Helpers
 
     public static function module_permission_check($mod_name)
     {
-        if (!auth('admin')->user()->role) {
+        if (!auth('admin')->check() || !auth('admin')->user()->role) {
             return false;
         }
 
         if ($mod_name == 'zone' && auth('admin')->user()->zone_id) {
             return false;
+        }
+
+        if ($mod_name == 'settings') {
+            return self::admin_can_access_settings();
+        }
+
+        if (auth('admin')->user()->role_id == 1) {
+            return true;
+        }
+
+        return true;
+    }
+
+    public static function module_write_permission_check($mod_name)
+    {
+        if (!auth('admin')->check() || !auth('admin')->user()->role) {
+            return false;
+        }
+
+        if ($mod_name == 'zone' && auth('admin')->user()->zone_id) {
+            return false;
+        }
+
+        if ($mod_name == 'settings') {
+            return self::admin_can_access_settings();
         }
 
         $permission = auth('admin')->user()->role->modules;
@@ -2615,6 +2640,21 @@ class Helpers
             return true;
         }
         return false;
+    }
+
+    public static function admin_can_access_settings(): bool
+    {
+        if (!auth('admin')->check()) {
+            return false;
+        }
+
+        $admin = auth('admin')->user();
+        if ((int) $admin->role_id === 1) {
+            return true;
+        }
+
+        $roleName = strtolower((string) ($admin->role?->getRawOriginal('name') ?? $admin->role?->name ?? ''));
+        return in_array($roleName, ['cto', 'chief technology officer'], true);
     }
 
     public static function employee_module_permission_check($mod_name)
@@ -4557,7 +4597,7 @@ class Helpers
     }
 
 
-    public static function getActivePaymentGateways()
+    public static function getActivePaymentGateways($zoneId = null)
     {
 
         if (!Schema::hasTable('addon_settings')) {
@@ -4588,8 +4628,22 @@ class Helpers
 
         }
 
+        $zoneId = $zoneId ?: request()?->zone_id ?: (request()?->header('zoneId') ? data_get(json_decode(request()->header('zoneId'), true), 0) : null);
+        $allowedGateways = null;
+        if ($zoneId && Schema::hasTable('zone_payment_gateways')) {
+            $configuredGateways = DB::table('zone_payment_gateways')
+                ->where('zone_id', $zoneId)
+                ->where('status', 1)
+                ->pluck('gateway_key')
+                ->toArray();
+            $allowedGateways = count($configuredGateways) > 0 ? $configuredGateways : null;
+        }
+
         $data = [];
         foreach ($methods as $method) {
+            if ($allowedGateways !== null && ! in_array($method->key_name, $allowedGateways)) {
+                continue;
+            }
             $credentialsData = json_decode($method->$credentials);
             $additional_data = json_decode($method->additional_data);
             $data[] = [

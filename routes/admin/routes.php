@@ -21,6 +21,7 @@ use App\Enums\ViewPaths\Admin\CommonCondition;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\Admin\Item\UnitController;
 use App\Http\Controllers\Admin\Zone\ZoneController;
+use App\Http\Controllers\Admin\Zone\MicroZoneController;
 use App\Http\Controllers\Admin\Item\AddonController;
 use App\Http\Controllers\Admin\Item\BrandController;
 use App\Http\Controllers\Admin\Banner\BannerController;
@@ -40,6 +41,8 @@ use App\Http\Controllers\Admin\Promotion\AdvertisementController;
 use App\Http\Controllers\Admin\Notification\NotificationController;
 use App\Http\Controllers\Admin\Subscription\SubscriptionController;
 use App\Http\Controllers\Admin\SurgePriceController;
+use App\Http\Controllers\Admin\FastaPrimeController;
+use App\Http\Controllers\Admin\SystemMaintenanceController;
 
 Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
 
@@ -229,6 +232,22 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 Route::post('/package-buy', [SubscriptionController::class, 'packageBuy'])->name('subscriptionackage.packageBuy');
             });
 
+            Route::group(['prefix' => 'fasta-prime', 'as' => 'fasta-prime.', 'middleware' => ['module:subscription']], function () {
+                Route::get('/', [FastaPrimeController::class, 'index'])->name('index');
+                Route::post('/', [FastaPrimeController::class, 'store'])->name('store');
+                Route::put('/{plan}', [FastaPrimeController::class, 'update'])->name('update');
+                Route::get('/status/{plan}', [FastaPrimeController::class, 'status'])->name('status');
+                Route::get('/subscribers', [FastaPrimeController::class, 'subscribers'])->name('subscribers');
+                Route::post('/subscribers/{subscription}/cancel', [FastaPrimeController::class, 'cancel'])->name('cancel');
+            });
+
+            Route::group(['prefix' => 'system-maintenance', 'as' => 'system-maintenance.', 'middleware' => ['module:settings']], function () {
+                Route::get('/', [SystemMaintenanceController::class, 'index'])->name('index');
+                Route::post('/backup', [SystemMaintenanceController::class, 'backup'])->name('backup');
+                Route::get('/backup/{backup}/download', [SystemMaintenanceController::class, 'download'])->name('download');
+                Route::post('/clear-log', [SystemMaintenanceController::class, 'clearLog'])->name('clear-log');
+            });
+
 
 
 
@@ -249,6 +268,12 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 Route::get(Zone::CASH_ON_DELIVERY[URI] . '/{id}/{cash_on_delivery}', [ZoneController::class, 'updateCashOnDelivery'])->name('cash-on-delivery');
                 Route::get(Zone::OFFLINE_PAYMENT[URI] . '/{id}/{offline_payment}', [ZoneController::class, 'updateOfflinePayment'])->name('offline-payment');
                 Route::get('default-status/{id}', [ZoneController::class, 'defaultStatus'])->name('default-status');
+                Route::get('micro-zones/by-zone', [MicroZoneController::class, 'byZone'])->name('micro-zones.by-zone');
+                Route::get('micro-zones/{microZone}/coordinates', [MicroZoneController::class, 'getCoordinates'])->name('micro-zones.coordinates');
+                Route::get('micro-zones', [MicroZoneController::class, 'index'])->name('micro-zones.index');
+                Route::post('micro-zones', [MicroZoneController::class, 'store'])->name('micro-zones.store');
+                Route::put('micro-zones/{microZone}', [MicroZoneController::class, 'update'])->name('micro-zones.update');
+                Route::delete('micro-zones/{microZone}', [MicroZoneController::class, 'destroy'])->name('micro-zones.destroy');
 
                 Route::group(['prefix' => 'surge-price', 'as' => 'surge-price.', 'middleware' => ['module:zone']], function () {
                     Route::get('/{zone_id}', [SurgePriceController::class, 'index'])->name('list');

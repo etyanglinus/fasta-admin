@@ -1,7 +1,7 @@
 @extends('layouts.landing.app')
 
 @section('title', 'Careers')
-@section('meta_description', 'Careers at 6amMart Kenya - join a local commerce, grocery delivery, logistics, and technology team building for Nairobi and beyond.')
+@section('meta_description', 'Careers at Fasta Deliveries Kenya - join a local commerce, grocery delivery, logistics, and technology team building for Nairobi and beyond.')
 
 @section('content')
     <section class="career-hero">

@@ -402,6 +402,13 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
                 Route::post('transfer-mart-from-drivemond', 'WalletController@transferMartFromDrivemondWallet')->withoutMiddleware('auth:api');
             });
 
+            Route::group(['prefix'=>'fasta-prime'], function() {
+                Route::get('plans', 'FastaPrimeController@plans');
+                Route::get('current', 'FastaPrimeController@current');
+                Route::post('subscribe', 'FastaPrimeController@subscribe');
+                Route::post('cancel', 'FastaPrimeController@cancel');
+            });
+
             Route::get('visit-again', 'OrderController@order_again');
             Route::get('recent-ordered-items', 'OrderController@get_recent_ordered_items');
 

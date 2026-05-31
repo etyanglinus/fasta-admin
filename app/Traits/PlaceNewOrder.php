@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Store;
 use App\Models\Coupon;
 use App\Models\DMVehicle;
+use App\Models\MicroZone;
 use App\Models\OrderDetail;
 use App\Models\ItemCampaign;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ use App\Mail\PlaceOrder;
 use App\Models\AddOn;
 use App\Models\SurgePrice;
 use App\Models\UserFile;
+use App\Models\FastaPrimeSubscription;
 use Carbon\Carbon;
 
 trait PlaceNewOrder
@@ -452,6 +454,17 @@ trait PlaceNewOrder
                     }
                     $coupon->increment('total_uses');
                 }
+
+                if ($order->order_type === 'delivery' && $order->is_guest == 0 && $order->delivery_charge > 0) {
+                    $primeSubscription = $this->getApplicableFastaPrimeSubscription($order->user_id, $order->delivery_charge);
+                    if ($primeSubscription) {
+                        $order->fasta_prime_subscription_id = $primeSubscription->id;
+                        $order->fasta_prime_delivery_discount = $order->delivery_charge;
+                        $order->delivery_charge = 0;
+                        $free_delivery_by = 'fasta_prime';
+                    }
+                }
+
                 $order->coupon_created_by = $coupon_created_by;
                 $order->coupon_discount_amount = round($coupon_discount_amount, config('round_up_to_digit'));
                 $order->coupon_discount_title = $coupon ? $coupon->title : '';
@@ -748,17 +761,60 @@ trait PlaceNewOrder
         return null;
     }
 
-    private function getVehicleExtraCharge($distance)
+    private function getVehicleExtraCharge($distance, $moduleId = null, $totalWeight = null)
     {
-        $data =  DMVehicle::active()->where(function ($query) use ($distance) {
-            $query->where('starting_coverage_area', '<=', $distance)->where('maximum_coverage_area', '>=', $distance)
-                ->orWhere(function ($query) use ($distance) {
-                    $query->where('starting_coverage_area', '>=', $distance);
+        $data =  DMVehicle::active()
+            ->where(function ($query) use ($distance) {
+                $query->where('starting_coverage_area', '<=', $distance)->where('maximum_coverage_area', '>=', $distance)
+                    ->orWhere(function ($query) use ($distance) {
+                        $query->where('starting_coverage_area', '>=', $distance);
+                    });
+            })
+            ->when($moduleId, function ($query) use ($moduleId) {
+                $query->where(function ($query) use ($moduleId) {
+                    $query->whereNull('module_id')->orWhere('module_id', $moduleId);
                 });
-        })
-            ->orderBy('starting_coverage_area')->first();
+            })
+            ->when($totalWeight !== null && is_numeric($totalWeight) && (float) $totalWeight > 0, function ($query) use ($totalWeight) {
+                $query->where(function ($query) use ($totalWeight) {
+                    $query->whereNull('maximum_weight')->orWhere('maximum_weight', '>=', (float) $totalWeight);
+                });
+            })
+            ->orderByRaw('module_id IS NULL')
+            ->orderByRaw('maximum_weight IS NULL')
+            ->orderBy('maximum_weight')
+            ->orderBy('starting_coverage_area')
+            ->first();
         return ['extraCharge' => (float) (isset($data) ? $data->extra_charges  : 0), 'vehicle_id' => $data?->id];
     }
+
+    private function getApplicableFastaPrimeSubscription($userId, $deliveryCharge)
+    {
+        $subscription = FastaPrimeSubscription::active()
+            ->where('user_id', $userId)
+            ->latest()
+            ->first();
+
+        if (!$subscription || !data_get($subscription->plan_snapshot, 'free_delivery', true)) {
+            return null;
+        }
+
+        $deliveryLimit = data_get($subscription->plan_snapshot, 'free_delivery_limit');
+        if ($deliveryLimit !== null && $deliveryLimit !== '' && (float) $deliveryCharge > (float) $deliveryLimit) {
+            return null;
+        }
+
+        $maxFreeDeliveries = data_get($subscription->plan_snapshot, 'max_free_deliveries');
+        if ($maxFreeDeliveries !== null && $maxFreeDeliveries !== '') {
+            $usedDeliveries = Order::where('fasta_prime_subscription_id', $subscription->id)->count();
+            if ($usedDeliveries >= (int) $maxFreeDeliveries) {
+                return null;
+            }
+        }
+
+        return $subscription;
+    }
+
     private function getZoneAndStore($request, $schedule_at)
     {
         if ($request->latitude && $request->longitude) {
@@ -804,40 +860,58 @@ trait PlaceNewOrder
         };
 
         if ($request->order_type !== 'parcel') {
-            $validationError = match (true) {
-                !$store => [
-                    'code'    => 'store',
-                    'message' => translate('messages.store_not_found'),
-                    'status_code' => 403,
-                ],
-                $request->schedule_at && $schedule_at < now() => [
-                    'code'    => 'order_time',
-                    'message' => translate('messages.you_can_not_schedule_a_order_in_past'),
-                    'status_code' => 403,
-                ],
-                $request->schedule_at && !$store->schedule_order => [
-                    'code'    => 'schedule_at',
-                    'message' => translate('messages.schedule_order_not_available'),
-                    'status_code' => 403,
-                ],
-                $store->open == false => [
-                    'code'    => 'order_time',
-                    'message' => translate('messages.store_is_closed_at_order_time'),
-                    'status_code' => 403,
-                ],
-                $store->store_business_model == 'unsubscribed' => [
-                    'code'    => 'order-confirmation-model',
-                    'message' => translate('messages.Sorry_the_store_is_unable_to_take_any_order_!'),
-                    'status_code' => 403,
-                ],
+            if (! $validationError && $store?->micro_zone_id) {
+                $storeMicroZone = MicroZone::find($store->micro_zone_id);
+                $customerInStoreCity = ! $storeMicroZone?->coordinates || MicroZone::where('id', $store->micro_zone_id)
+                    ->where('zone_id', $store->zone_id)
+                    ->whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))
+                    ->exists();
 
-                $store->is_valid_subscription && $store_sub && $store_sub->max_order != "unlimited" && $store_sub->max_order <= 0 => [
-                    'code'    => 'order-confirmation-error',
-                    'message' => translate('messages.Sorry_the_store_is_unable_to_take_any_order_!'),
-                    'status_code' => 403,
-                ],
-                default => null,
-            };
+                if (! $customerInStoreCity) {
+                    $validationError = [
+                        'code' => 'micro_zone',
+                        'message' => translate('messages.This_store_only_serves_customers_inside_its_city_micro_zone'),
+                        'status_code' => 403,
+                    ];
+                }
+            }
+
+            if (! $validationError) {
+                $validationError = match (true) {
+                    !$store => [
+                        'code'    => 'store',
+                        'message' => translate('messages.store_not_found'),
+                        'status_code' => 403,
+                    ],
+                    $request->schedule_at && $schedule_at < now() => [
+                        'code'    => 'order_time',
+                        'message' => translate('messages.you_can_not_schedule_a_order_in_past'),
+                        'status_code' => 403,
+                    ],
+                    $request->schedule_at && !$store->schedule_order => [
+                        'code'    => 'schedule_at',
+                        'message' => translate('messages.schedule_order_not_available'),
+                        'status_code' => 403,
+                    ],
+                    $store->open == false => [
+                        'code'    => 'order_time',
+                        'message' => translate('messages.store_is_closed_at_order_time'),
+                        'status_code' => 403,
+                    ],
+                    $store->store_business_model == 'unsubscribed' => [
+                        'code'    => 'order-confirmation-model',
+                        'message' => translate('messages.Sorry_the_store_is_unable_to_take_any_order_!'),
+                        'status_code' => 403,
+                    ],
+
+                    $store->is_valid_subscription && $store_sub && $store_sub->max_order != "unlimited" && $store_sub->max_order <= 0 => [
+                        'code'    => 'order-confirmation-error',
+                        'message' => translate('messages.Sorry_the_store_is_unable_to_take_any_order_!'),
+                        'status_code' => 403,
+                    ],
+                    default => null,
+                };
+            }
         }
 
         if ($validationError) {
@@ -917,7 +991,11 @@ trait PlaceNewOrder
         if ($surge['price'] > 0) {
             $increased = $surge['price'];
         }
-        $vehicleExtraCharge = $this->getVehicleExtraCharge($request->distance ?? 0);
+        $vehicleExtraCharge = $this->getVehicleExtraCharge(
+            $request->distance ?? 0,
+            getModuleId($request->header('moduleId')),
+            $request->total_weight ?? null
+        );
         $extra_charges = $vehicleExtraCharge['extraCharge'];
         $vehicle_id = $vehicleExtraCharge['vehicle_id'];
 
@@ -2003,7 +2081,11 @@ trait PlaceNewOrder
                 ->orWhere(function ($query) use ($distance) {
                     $query->where('starting_coverage_area', '>=', $distance);
                 })
+                ->where(function ($query) use ($store) {
+                    $query->whereNull('module_id')->orWhere('module_id', $store->module_id);
+                })
                 ->active()
+                ->orderByRaw('module_id IS NULL')
                 ->orderBy('starting_coverage_area')->first();
 
                 $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);

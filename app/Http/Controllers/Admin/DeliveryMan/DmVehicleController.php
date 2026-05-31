@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
+use App\Models\Module;
 
 class DmVehicleController extends BaseController
 {
@@ -37,7 +38,8 @@ class DmVehicleController extends BaseController
     {
         $language = getWebConfig('language');
         $defaultLang = str_replace('_', '-', app()->getLocale());
-        return view(DmVehicleViewPath::ADD[VIEW], compact('language','defaultLang'));
+        $modules = Module::active()->get(['id', 'module_name']);
+        return view(DmVehicleViewPath::ADD[VIEW], compact('language','defaultLang', 'modules'));
     }
 
     private function getListView(Request $request): View
@@ -54,17 +56,6 @@ class DmVehicleController extends BaseController
 
     public function add(DmVehicleAddRequest $request): JsonResponse
     {
-        $temp = $this->vehicleRepo->getExistFirst(
-            params: [
-                'starting_coverage_area' => $request['starting_coverage_area'],
-                'maximum_coverage_area' => $request['maximum_coverage_area']
-            ]
-        );
-        if (isset($temp)) {
-            return response()->json(['errors' => [
-                ['code' => 'Vehicle_overlapped', 'message' => translate('messages.Coverage_area_overlapped')]
-            ]]);
-        }
         $vehicle = $this->vehicleRepo->add(data: $this->vehicleService->getAddData(request: $request));
         $this->translationRepo->addByModel(request: $request, model: $vehicle, modelPath: 'App\Models\DMVehicle', attribute: 'type');
 
@@ -76,23 +67,12 @@ class DmVehicleController extends BaseController
         $vehicle = $this->vehicleRepo->getFirstWithoutGlobalScopeWhere(params: ['id' => $id]);
         $language = getWebConfig('language');
         $defaultLang = str_replace('_', '-', app()->getLocale());
-        return view(DmVehicleViewPath::UPDATE[VIEW], compact('vehicle','language','defaultLang'));
+        $modules = Module::active()->get(['id', 'module_name']);
+        return view(DmVehicleViewPath::UPDATE[VIEW], compact('vehicle','language','defaultLang', 'modules'));
     }
 
     public function update(DmVehicleUpdateRequest $request, $id): JsonResponse
     {
-        $temp = $this->vehicleRepo->getExistFirst(
-            params: [
-                'starting_coverage_area' => $request['starting_coverage_area'],
-                'maximum_coverage_area' => $request['maximum_coverage_area']
-            ],
-            id: $id
-        );
-        if (isset($temp)) {
-            return response()->json(['errors' => [
-                ['code' => 'Vehicle_overlapped', 'message' => translate('messages.Coverage_area_overlapped')]
-            ]]);
-        }
         $vehicle = $this->vehicleRepo->update(id: $id ,data: $this->vehicleService->getUpdateData(request: $request));
         $this->translationRepo->updateByModel(request: $request, model: $vehicle, modelPath: 'App\Models\DMVehicle', attribute: 'type');
 

@@ -28,6 +28,7 @@
                                 <div class="mb-20">
                                     <h4 class="title-clr fs-18 mb-1">{{ translate('messages.Role form') }}</h4>
                                     <p class="fs-12 mb-0">{{ translate('messages.Create role and assignee the role module & usage permission.') }}</p>
+                                    <p class="fs-12 mb-0 text-danger">{{ translate('Settings access is reserved for the main admin and roles named CTO or Chief Technology Officer. Other employees can view admin pages but can only change modules selected here.') }}</p>
                                 </div>
                                 <div class="bg-light2 rounded p-xxl-20 p-3">
                                     @if ($language)

@@ -84,6 +84,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class)->where('is_guest', 0);
     }
+    public function fastaPrimeSubscriptions()
+    {
+        return $this->hasMany(FastaPrimeSubscription::class);
+    }
+    public function activeFastaPrimeSubscription()
+    {
+        return $this->hasOne(FastaPrimeSubscription::class)->active()->latestOfMany();
+    }
     public function trips()
     {
         return $this->hasMany(Trips::class)->where('is_guest', 0);

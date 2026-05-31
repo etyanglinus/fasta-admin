@@ -82,6 +82,7 @@ class VendorController extends Controller
                     }
                 }, ],
             'zone_id' => 'required',
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
             'logo' => 'required|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
             'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
 
@@ -135,6 +136,7 @@ class VendorController extends Controller
         $store->longitude = $request->longitude;
         $store->vendor_id = $vendor->id;
         $store->zone_id = $request->zone_id;
+        $store->micro_zone_id = $request->micro_zone_id;
         $store->tin = $request->tin;
         $store->tin_expire_date = $request->tin_expire_date;
         $extension = $request->has('tin_certificate_image') ? $request->file('tin_certificate_image')->getClientOriginalExtension() : 'png';
@@ -185,6 +187,7 @@ class VendorController extends Controller
             'email' => 'required|unique:vendors,email,'.$store->vendor->id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:vendors,phone,'.$store->vendor->id,
             'zone_id' => 'required',
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols(), function ($attribute, $value, $fail) {
@@ -247,6 +250,7 @@ class VendorController extends Controller
         $store->latitude = $request->latitude;
         $store->longitude = $request->longitude;
         $store->zone_id = $request->zone_id;
+        $store->micro_zone_id = $request->micro_zone_id;
         $store->tin = $request->tin;
         $store->tin_expire_date = $request->tin_expire_date;
         $extension = $request->has('tin_certificate_image') ? $request->file('tin_certificate_image')->getClientOriginalExtension() : 'png';

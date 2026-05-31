@@ -141,6 +141,12 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label class="input-label">{{ translate('Micro Zone') }}</label>
+                                    <select name="micro_zone_id" id="choice_micro_zone" class="form-control js-select2-custom">
+                                        <option value="">{{ translate('Select micro zone') }}</option>
+                                    </select>
+                                </div>
                                 <div class="position-relative">
                                     <label class="input-label"
                                         for="tax">{{ translate('Estimated Delivery Time ( Min & Maximum Time)') }}
@@ -612,9 +618,33 @@
 
         $('#reset_btn').click(function() {
             $('#choice_zones').val(null).trigger('change');
+            $('#choice_micro_zone').val(null).trigger('change');
             zonePolygon.setMap(null);
             $('#latitude').val(null);
             $('#longitude').val(null);
         })
+
+        function loadMicroZones(zoneId, selectedId) {
+            let target = $('#choice_micro_zone');
+            target.html('<option value="">{{ translate('Select micro zone') }}</option>');
+            if (!zoneId) {
+                target.trigger('change');
+                return;
+            }
+            $.get({
+                url: '{{ route('admin.business-settings.zone.micro-zones.by-zone') }}',
+                data: { zone_id: zoneId },
+                success: function (data) {
+                    data.forEach(function (item) {
+                        target.append(new Option(item.name, item.id, false, String(item.id) === String(selectedId)));
+                    });
+                    target.trigger('change');
+                }
+            });
+        }
+
+        $('#choice_zones').on('change', function () {
+            loadMicroZones(this.value, '{{ old('micro_zone_id') }}');
+        });
     </script>
 @endpush

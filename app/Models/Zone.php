@@ -54,6 +54,7 @@ class Zone extends Model
     protected $fillable = [
         'name',
         'display_name',
+        'currency_code',
         'coordinates',
         'status',
         'store_wise_topic',
@@ -117,6 +118,16 @@ class Zone extends Model
     public function deliverymen(): HasMany
     {
         return $this->hasMany(DeliveryMan::class);
+    }
+
+    public function microZones(): HasMany
+    {
+        return $this->hasMany(MicroZone::class);
+    }
+
+    public function paymentGateways(): HasMany
+    {
+        return $this->hasMany(ZonePaymentGateway::class);
     }
 
     public function surge_prices(): HasMany

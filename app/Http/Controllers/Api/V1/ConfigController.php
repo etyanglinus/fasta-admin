@@ -833,13 +833,29 @@ class ConfigController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $distance_data = $request->distance ?? 1;
+        $moduleId = $request->module_id ?? getModuleId($request->header('moduleId'));
+        $totalWeight = $request->total_weight;
         $data = DmVehicle::active()
             ->where(function ($query) use ($distance_data) {
                 $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data)
                     ->orWhere(function ($query) use ($distance_data) {
                         $query->where('starting_coverage_area', '>=', $distance_data);
                     });
-            })->orderBy('starting_coverage_area')->first();
+            })
+            ->when($moduleId, function ($query) use ($moduleId) {
+                $query->where(function ($query) use ($moduleId) {
+                    $query->whereNull('module_id')->orWhere('module_id', $moduleId);
+                });
+            })
+            ->when($totalWeight !== null && is_numeric($totalWeight) && (float) $totalWeight > 0, function ($query) use ($totalWeight) {
+                $query->where(function ($query) use ($totalWeight) {
+                    $query->whereNull('maximum_weight')->orWhere('maximum_weight', '>=', (float) $totalWeight);
+                });
+            })
+            ->orderByRaw('module_id IS NULL')
+            ->orderByRaw('maximum_weight IS NULL')
+            ->orderBy('maximum_weight')
+            ->orderBy('starting_coverage_area')->first();
 
         $extra_charges = (float)(isset($data) ? $data->extra_charges : 0);
 
@@ -848,7 +864,13 @@ class ConfigController extends Controller
 
     public function get_vehicles(Request $request)
     {
-        $data = DMVehicle::active()->get(['id', 'type']);
+        $data = DMVehicle::active()
+            ->when($request->module_id, function ($query) use ($request) {
+                $query->where(function ($query) use ($request) {
+                    $query->whereNull('module_id')->orWhere('module_id', $request->module_id);
+                });
+            })
+            ->get(['id', 'type', 'module_id', 'maximum_weight']);
 
         return response()->json($data, 200);
     }

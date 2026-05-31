@@ -112,6 +112,7 @@ class Store extends Model
         'item_section',
         'tax',
         'zone_id',
+        'micro_zone_id',
         'reviews_section',
         'active',
         'off_day',
@@ -161,6 +162,7 @@ class Store extends Model
         'delivery' => 'boolean',
         'take_away' => 'boolean',
         'zone_id' => 'integer',
+        'micro_zone_id' => 'integer',
         'module_id' => 'integer',
         'item_section' => 'boolean',
         'reviews_section' => 'boolean',
@@ -465,6 +467,16 @@ class Store extends Model
     public function zone(): BelongsTo
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function microZone(): BelongsTo
+    {
+        return $this->belongsTo(MicroZone::class);
+    }
+
+    public function visitLogs(): HasMany
+    {
+        return $this->hasMany(StoreVisitLog::class);
     }
 
     public function getPickupZones()

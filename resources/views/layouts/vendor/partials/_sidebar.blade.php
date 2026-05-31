@@ -704,6 +704,14 @@
 
                     @if (\App\CentralLogics\Helpers::employee_module_permission_check('expense_report'))
                         <li
+                            class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/report/store-visits') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('vendor.report.store-visits') }}"
+                                title="{{ translate('Store Analytics') }}">
+                                <span class="tio-chart-bar-4 nav-icon"></span>
+                                <span class="text-truncate">{{ translate('Store Analytics') }}</span>
+                            </a>
+                        </li>
+                        <li
                             class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/report/expense-report') ? 'active' : '' }}">
                             <a class="nav-link " href="{{ route('vendor.report.expense-report') }}"
                                 title="{{ translate('messages.expense_report') }}">

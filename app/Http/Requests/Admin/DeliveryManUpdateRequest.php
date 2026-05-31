@@ -45,6 +45,7 @@ class DeliveryManUpdateRequest extends FormRequest
             'identity_number' => 'required|max:30',
             'email' => 'required|unique:delivery_men,email,'.$this->id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$this->id,
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
             'vehicle_id' => 'required',
             'earning' => 'required',
             'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),

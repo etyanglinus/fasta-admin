@@ -1,7 +1,7 @@
 @extends('layouts.landing.app')
 
 @section('title', 'Developers')
-@section('meta_description', 'Developer resources for 6amMart Kenya are coming soon.')
+@section('meta_description', 'Developer resources for Fasta Deliveries Kenya are coming soon.')
 
 @section('content')
     <section class="coming-soon-page">

@@ -9,7 +9,7 @@
 
     <!-- Progress -->
     <div class="pb-2 px-2 px-sm-5 mx-xl-4">
-        <div class="progress cursor-pointer" role="progressbar" aria-label="6amMart Software Installation"
+        <div class="progress cursor-pointer" role="progressbar" aria-label="Fasta Deliveries Software Installation"
              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-bs-toggle="tooltip"
              data-bs-placement="top" data-bs-custom-class="custom-progress-tooltip" data-bs-title="Intro Step!"
              data-bs-delay='{"hide":1000}'>

@@ -27,6 +27,42 @@
             <div class="col-md-12 mb-2">
                 <div class="card">
                     <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-group mb-0">
+                                    <label class="input-label">{{ translate('Zone Currency') }}</label>
+                                    <select name="currency_code" class="form-control js-select2-custom">
+                                        <option value="">{{ translate('Use system default currency') }}</option>
+                                        @foreach($currencies ?? [] as $currency)
+                                            <option value="{{ $currency->currency_code }}" {{ $zone->currency_code == $currency->currency_code ? 'selected' : '' }}>
+                                                {{ $currency->currency_code }} ({{ $currency->currency_symbol }}) {{ $currency->country ? '- '.$currency->country : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group mb-0">
+                                    <label class="input-label">{{ translate('Allowed Digital Payment Gateways') }}</label>
+                                    <select name="payment_gateways[]" class="form-control js-select2-custom" multiple>
+                                        @foreach($paymentGateways ?? [] as $gateway)
+                                            @php($additionalData = $gateway->additional_data ? json_decode($gateway->additional_data, true) : [])
+                                            <option value="{{ $gateway->key_name }}" {{ in_array($gateway->key_name, $selectedPaymentGateways ?? []) ? 'selected' : '' }}>
+                                                {{ data_get($additionalData, 'gateway_title') ?: ucwords(str_replace('_', ' ', $gateway->key_name)) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">{{ translate('Leave empty to allow all active gateways in this zone.') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12 mb-2">
+                <div class="card">
+                    <div class="card-body">
 
                         <div class="row g-3 align-items-end">
 

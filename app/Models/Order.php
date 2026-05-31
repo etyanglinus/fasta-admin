@@ -48,6 +48,8 @@ class Order extends Model
         'is_guest' => 'boolean',
         'ref_bonus_amount' => 'float',
         'bring_change_amount'=>'integer',
+        'fasta_prime_subscription_id' => 'integer',
+        'fasta_prime_delivery_discount' => 'float',
     ];
 
     protected $appends = ['module_type','order_attachment_full_url','order_proof_full_url'];
@@ -179,6 +181,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function fastaPrimeSubscription()
+    {
+        return $this->belongsTo(FastaPrimeSubscription::class, 'fasta_prime_subscription_id');
     }
 
     public function guest()

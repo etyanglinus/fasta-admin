@@ -12,10 +12,19 @@ class ZoneController extends Controller
 {
     public function get_zones()
     {
-        $zones= Zone::where('status',1)->get();
+        $zones= Zone::with(['microZones' => fn ($query) => $query->active()->select('id', 'zone_id', 'name', 'coordinates')])
+            ->where('status',1)
+            ->get();
         foreach($zones as $zone){
             $area = json_decode($zone->coordinates[0]->toJson(),true);
             $zone['formated_coordinates']=Helpers::format_coordiantes($area['coordinates']);
+            $zone['currency_code'] = $zone->currency_code ?: Helpers::currency_code();
+            foreach ($zone->microZones as $microZone) {
+                if ($microZone->coordinates) {
+                    $microZoneArea = json_decode($microZone->coordinates[0]->toJson(), true);
+                    $microZone['formated_coordinates'] = Helpers::format_coordiantes($microZoneArea['coordinates']);
+                }
+            }
         }
         return response()->json($zones, 200);
     }

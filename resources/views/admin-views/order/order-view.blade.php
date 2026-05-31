@@ -908,6 +908,8 @@
 
                                              @elseif ($order->free_delivery_by == 'vendor')
                                              <i class="tio-info-outined" data-toggle="tooltip" title="{{ translate('Delivery fee is applicable and will be covered by the Vendor.') }}"></i>
+                                             @elseif ($order->free_delivery_by == 'fasta_prime')
+                                             <i class="tio-info-outined" data-toggle="tooltip" title="{{ translate('Delivery fee is covered by Fasta Prime.') }}"></i>
                                              @endif
                                                  :</dt>
                                          <dd class="col-6 text-dark fs-14">

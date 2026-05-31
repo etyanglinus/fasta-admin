@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\LoginActivityLog;
  use App\Models\Module;
 use App\Models\Vendor;
 use App\Models\DataSetting;
@@ -98,10 +99,13 @@ class LoginController extends Controller
         $auth = ($role == 'admin_employee' ? 'admin' : $role);
         if (auth($auth)->attempt(['email' => $email, 'password' => $password], $remember)) {
             $user = auth($auth)->user();
-            $newToken = $user?->login_remember_token ?? Str::random(60);
+            $singleDeviceRole = in_array($role, ['admin_employee', 'vendor_employee'], true);
+            $newToken = $singleDeviceRole ? Str::random(60) : ($user?->login_remember_token ?? Str::random(60));
             $user->login_remember_token = $newToken;
             $user->save();
             session(['login_remember_token' => $newToken]);
+            $isWelcomeBack = $this->recordLoginActivity($role, $user, request());
+            session()->flash('fasta_welcome_message', $isWelcomeBack ? translate('Welcome Back') : translate('Welcome to Fasta Deliveries'));
             if ($remember) {
                 Cookie::queue('role', $role, 120);
                 Cookie::queue('e_token', Crypt::encryptString($email), 120);
@@ -116,6 +120,65 @@ class LoginController extends Controller
             }
         }
         return false;
+    }
+
+    private function recordLoginActivity(string $role, object $user, Request $request): bool
+    {
+        $hadPreviousLogin = LoginActivityLog::where('user_type', $role)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        $device = $this->detectDevice($request->userAgent() ?? '');
+
+        LoginActivityLog::create([
+            'user_type' => $role,
+            'user_id' => $user->id,
+            'name' => trim(($user->f_name ?? '') . ' ' . ($user->l_name ?? '')) ?: ($user->name ?? null),
+            'email' => $user->email ?? null,
+            'ip_address' => $request->ip(),
+            'device_type' => $device['device_type'],
+            'os' => $device['os'],
+            'browser' => $device['browser'],
+            'user_agent' => $request->userAgent(),
+            'logged_in_at' => now(),
+        ]);
+
+        return $hadPreviousLogin;
+    }
+
+    private function detectDevice(string $userAgent): array
+    {
+        $lower = strtolower($userAgent);
+
+        $os = match (true) {
+            str_contains($lower, 'android') => 'Android',
+            str_contains($lower, 'iphone') || str_contains($lower, 'ipad') => 'iOS',
+            str_contains($lower, 'mac os') || str_contains($lower, 'macintosh') => 'Mac',
+            str_contains($lower, 'windows') => 'Windows',
+            str_contains($lower, 'linux') => 'Linux',
+            default => 'Unknown',
+        };
+
+        $browser = match (true) {
+            str_contains($lower, 'edg/') => 'Microsoft Edge',
+            str_contains($lower, 'opr/') || str_contains($lower, 'opera') => 'Opera',
+            str_contains($lower, 'chrome/') && ! str_contains($lower, 'edg/') => 'Chrome',
+            str_contains($lower, 'safari/') && ! str_contains($lower, 'chrome/') => 'Safari',
+            str_contains($lower, 'firefox/') => 'Firefox',
+            default => 'Unknown',
+        };
+
+        $deviceType = match (true) {
+            str_contains($lower, 'android') => 'Android',
+            str_contains($lower, 'iphone') || str_contains($lower, 'ipad') => 'iOS',
+            str_contains($lower, 'mobile') => 'Mobile',
+            str_contains($lower, 'linux') => 'Linux',
+            str_contains($lower, 'mac os') || str_contains($lower, 'macintosh') => 'Mac',
+            str_contains($lower, 'windows') => 'Windows',
+            default => 'Desktop',
+        };
+
+        return compact('deviceType', 'os', 'browser') + ['device_type' => $deviceType];
     }
 
 

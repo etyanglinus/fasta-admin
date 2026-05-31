@@ -93,6 +93,17 @@
                                         min="0" required name="extra_charges">
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="input-label">{{ translate('Business Module') }}</label>
+                                    <select name="module_id" class="form-control js-select2-custom">
+                                        <option value="">{{ translate('All modules') }}</option>
+                                        @foreach($modules ?? [] as $module)
+                                            <option value="{{ $module->id }}">{{ $module->module_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-12">
@@ -127,6 +138,13 @@
                                     </label>
                                     <input type="number" id="maximum_coverage_area" class="form-control h--45px"
                                         step="0.001" min="0" required name="maximum_coverage_area">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="input-label">{{ translate('Maximum Weight') }} ({{ translate('kg') }})</label>
+                                    <input type="number" id="maximum_weight" class="form-control h--45px"
+                                        step="0.001" min="0" name="maximum_weight" placeholder="{{ translate('Leave empty for no weight limit') }}">
                                 </div>
                             </div>
 

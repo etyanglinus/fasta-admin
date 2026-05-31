@@ -11,6 +11,7 @@ use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Review;
+use App\Services\StoreVisitService;
 use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
@@ -113,6 +114,8 @@ class StoreController extends Controller
         $store = StoreLogic::get_store_details($id,$longitude,$latitude);
         if($store)
         {
+            StoreVisitService::record($store->id, 'app');
+
             $category_ids = DB::table('items')
             ->join('categories', 'items.category_id', '=', 'categories.id')
             ->selectRaw('categories.position as positions, IF((categories.position = "0"), categories.id, categories.parent_id) as categories')

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\OrderVerificationMail;
 use App\CentralLogics\CustomerLogic;
 use App\Models\Module;
+use App\Models\FastaPrimeSubscription;
 use Illuminate\Support\Facades\Mail;
 use App\Models\SubscriptionBillingAndRefundHistory;
 use Brian2694\Toastr\Facades\Toastr;
@@ -249,6 +250,50 @@ if (! function_exists('wallet_success')) {
         $order->payment_status='failed';
         $order->payment_method=$data->payment_method;
         $order->save();
+    }
+}
+
+if (! function_exists('fasta_prime_success')) {
+    function fasta_prime_success($data) {
+        $subscription = FastaPrimeSubscription::find($data->attribute_id);
+
+        if (!$subscription) {
+            return false;
+        }
+
+        FastaPrimeSubscription::where('user_id', $subscription->user_id)
+            ->where('id', '!=', $subscription->id)
+            ->where('status', 1)
+            ->update(['status' => 0, 'is_canceled' => 1, 'canceled_at' => now()]);
+
+        $validityDays = (int) data_get($subscription->plan_snapshot, 'validity_days', 30);
+        $subscription->payment_method = $data->payment_method;
+        $subscription->payment_status = 'paid';
+        $subscription->transaction_reference = $data->transaction_ref ?? null;
+        $subscription->start_date = now();
+        $subscription->end_date = now()->addDays($validityDays);
+        $subscription->status = 1;
+        $subscription->is_canceled = 0;
+        $subscription->save();
+
+        return true;
+    }
+}
+
+if (! function_exists('fasta_prime_failed')) {
+    function fasta_prime_failed($data) {
+        $subscription = FastaPrimeSubscription::find($data->attribute_id);
+
+        if (!$subscription) {
+            return false;
+        }
+
+        $subscription->payment_method = $data->payment_method;
+        $subscription->payment_status = 'failed';
+        $subscription->status = 0;
+        $subscription->save();
+
+        return true;
     }
 }
 

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\Zone\MicroZoneController;
+use App\Http\Controllers\StorefrontRedirectController;
 use App\Http\Controllers\PaytmController;
 use App\Http\Controllers\LiqPayController;
 use App\Http\Controllers\PaymobController;
@@ -32,7 +34,9 @@ use Illuminate\Support\Facades\Artisan;
 
 
 Route::post('/subscribeToTopic', [FirebaseController::class, 'subscribeToTopic']);
-Route::get('/', 'HomeController@index')->name('home');
+Route::get('/', [StorefrontRedirectController::class, 'home'])->name('home');
+Route::get('shop/{slug}', [StorefrontRedirectController::class, 'shop'])->name('shop.redirect');
+Route::get('micro-zones/by-zone', [MicroZoneController::class, 'byZone'])->name('micro-zones.by-zone');
 Route::get('lang/{locale}', 'HomeController@lang')->name('lang');
 Route::get('terms-and-conditions', 'HomeController@terms_and_conditions')->name('terms-and-conditions');
 Route::get('about-us', 'HomeController@about_us')->name('about-us');

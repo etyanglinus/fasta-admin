@@ -109,7 +109,12 @@ $countryCode= strtolower($country?$country->value:'auto');
                                 @endforeach
                             </select>
                         </div>
-                        <div></div>
+                        <div class="form-group">
+                            <label>{{ translate('Micro Zone') }}</label>
+                            <select name="micro_zone_id" id="micro_zone_id">
+                                <option value="">{{ translate('Select micro zone') }}</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Section 2: Identity Verification -->
@@ -712,6 +717,28 @@ $countryCode= strtolower($country?$country->value:'auto');
                 btn.disabled = !cb.checked;
             });
         })();
+
+        function loadMicroZones(zoneId, selectedId) {
+            var target = document.getElementById('micro_zone_id');
+            if (!target) return;
+            target.innerHTML = '<option value="">{{ translate('Select micro zone') }}</option>';
+            if (!zoneId) return;
+            $.get({
+                url: '{{ route('micro-zones.by-zone') }}',
+                data: { zone_id: zoneId },
+                success: function (data) {
+                    data.forEach(function (item) {
+                        var option = new Option(item.name, item.id, false, String(item.id) === String(selectedId));
+                        target.add(option);
+                    });
+                }
+            });
+        }
+
+        $('select[name="zone_id"]').on('change', function () {
+            loadMicroZones(this.value);
+        });
+        loadMicroZones($('select[name="zone_id"]').val(), '{{ old('micro_zone_id') }}');
 
     </script>
 

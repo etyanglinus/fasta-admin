@@ -3,6 +3,7 @@
 use App\Http\Controllers\Vendor\ItemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Vendor\SubscriptionController;
+use App\Http\Controllers\Vendor\StoreAnalyticsController;
 
 
 Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
@@ -295,6 +296,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
 
         Route::group(['prefix' => 'report', 'as' => 'report.'], function () {
             Route::post('set-date', 'ReportController@set_date')->name('set-date');
+            Route::get('store-visits', [StoreAnalyticsController::class, 'index'])->name('store-visits');
             Route::group(['middleware' => ['module:expense_report' ,'subscription:expense_report']], function () {
                 Route::get('store-earning-report', 'StoreEarningReportController@getStoreEarningReport')->name('store-earning-report');
                 Route::get('store-earning-summary', 'StoreEarningReportController@getStoreEarningSummary')->name('store-earning-summary');

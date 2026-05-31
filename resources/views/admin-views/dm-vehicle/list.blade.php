@@ -58,9 +58,11 @@
                             <tr>
                                 <th>{{ translate('messages.sl') }}</th>
                                 <th >{{translate('messages.Type')}}</th>
+                                <th>{{ translate('Module') }}</th>
                                 <th >{{translate('messages.Total_Deliveryman')}}</th>
                                 <th >{{translate('messages.minimum_coverage_area')}} ({{ translate('messages.km') }}) </th>
                                 <th >{{translate('messages.Maximum_coverage_area')}} ({{ translate('messages.km') }})</th>
+                                <th>{{ translate('Max Weight') }} ({{ translate('kg') }})</th>
                                 <th >{{translate('messages.Extra_charges')}}  ({{ \App\CentralLogics\Helpers::currency_symbol() }})</th>
                                 <th>{{translate('messages.status')}}</th>
                                 <th class="text-center">{{translate('messages.action')}}</th>
@@ -75,6 +77,7 @@
                                         <span class="d-block text-body"><a href="{{route('admin.users.delivery-man.vehicle.view',[$vehicle->id])}}">{{Str::limit($vehicle['type'],25, '...')}}</a>
                                         </span>
                                     </td>
+                                    <td>{{ $vehicle->module?->module_name ?? translate('All modules') }}</td>
                                     <td>
                                         {{ $vehicle->delivery_man_count }}
                                     </td>
@@ -88,6 +91,7 @@
                                             {{ $vehicle->maximum_coverage_area }}
                                         </span>
                                     </td>
+                                    <td>{{ $vehicle->maximum_weight ?? translate('No limit') }}</td>
                                     <td>
                                         <span class="bg-gradient-light text-dark">
                                          {{ \App\CentralLogics\Helpers::format_currency($vehicle->extra_charges) }}
@@ -120,8 +124,10 @@
                                             data-id="{{$vehicle->id}}"
                                             data-vehicle_type="{{ $vehicle->type }}"
                                             data-status="{{ $vehicle->status}}"
+                                            data-module="{{ $vehicle->module?->module_name ?? translate('All modules') }}"
                                             data-starting_coverage_area="{{ $vehicle->starting_coverage_area}}"
                                             data-maximum_coverage_area="{{ $vehicle->maximum_coverage_area}}"
+                                            data-maximum_weight="{{ $vehicle->maximum_weight ?? translate('No limit') }}"
                                             data-extra_charges="{{$vehicle->extra_charges}}"
                                             data-edit_button="{{route('admin.users.delivery-man.vehicle.edit',[$vehicle['id']])}}"
                                             data-delete_button="vehicle-{{$vehicle['id']}}"
@@ -194,6 +200,11 @@
                             </div>
 
                             <div class="bg-light border mt-4 p-4 rounded text-dark">
+                                <div class="d-flex justify-content-center mb-2 align-items-center gap-2">
+                                    <span>{{ translate('Module') }}</span>
+                                    :
+                                    <span class="font-semibold text-dark" id="module"></span>
+                                </div>
                                 <div class="d-flex justify-content-center  align-items-center gap-2">
                                     <span>{{translate('minimum_coverage_area')}} ({{ translate('messages.km') }})</span>
                                     :
@@ -203,6 +214,11 @@
                                     <span>{{translate('maximum_coverage_area')}} ({{ translate('messages.km') }})</span>
                                     :
                                     <span class="font-semibold text-dark" id="maximum_coverage_area"></span>
+                                </div>
+                                <div class="d-flex justify-content-center mb-2 align-items-center gap-2">
+                                    <span>{{ translate('Max Weight') }} ({{ translate('kg') }})</span>
+                                    :
+                                    <span class="font-semibold text-dark" id="maximum_weight"></span>
                                 </div>
                                 <div class="d-flex justify-content-center  align-items-center gap-2">
                                     <span>{{translate('extra_charges')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})</span>
@@ -234,8 +250,10 @@
             let data = $(this).data();
             $('.modal-body #id').text(data.id);
             $('.modal-body #vehicle_type').text(data.vehicle_type);
+            $('.modal-body #module').text(data.module);
             $('.modal-body #starting_coverage_area').text(data.starting_coverage_area);
             $('.modal-body #maximum_coverage_area').text(data.maximum_coverage_area);
+            $('.modal-body #maximum_weight').text(data.maximum_weight);
             $('.modal-body #extra_charges') .text(data.extra_charges);
             $('.modal-body #delete_button').attr('data-id',  data.delete_button);
             $('.modal-body #edit_button').attr('href',  data.edit_button);

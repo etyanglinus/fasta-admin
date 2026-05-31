@@ -1,7 +1,7 @@
 @extends('layouts.landing.app')
 
 @section('title', 'Press & Media')
-@section('meta_description', 'Press and media resources for 6amMart Kenya, including company announcements, press releases, media kit downloads, and brand assets.')
+@section('meta_description', 'Press and media resources for Fasta Deliveries Kenya, including company announcements, press releases, media kit downloads, and brand assets.')
 
 @section('content')
     <section class="press-hero">

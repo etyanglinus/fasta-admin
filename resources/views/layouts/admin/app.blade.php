@@ -52,6 +52,8 @@ $countryCode = strtolower($country ? $country : 'auto');
 </head>
 
 <body class="footer-offset">
+    @include('partials.fasta-welcome-animation')
+
     @if (getEnvMode() == 'demo')
         <div class="direction-toggle">
             <i class="tio-settings"></i>

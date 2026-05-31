@@ -47,6 +47,7 @@ class DeliveryManAddRequest extends FormRequest
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:delivery_men',
             'zone_id' => 'required',
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
             'earning' => 'required',
             'vehicle_id' => 'required',
             'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols(),

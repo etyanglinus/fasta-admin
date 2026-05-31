@@ -25,6 +25,220 @@
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/theme.minc619.css?v=1.0')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/style.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/toastr.css">
+    <style>
+        :root {
+            --fasta-login-primary: #039d55;
+            --fasta-login-ink: #15332a;
+            --fasta-login-muted: #6b7f78;
+            --fasta-login-line: #dce8e2;
+            --fasta-login-soft: #f4faf7;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 15% 18%, rgba(3, 157, 85, 0.13), transparent 28%),
+                linear-gradient(135deg, #eef7f2 0%, #ffffff 45%, #f3f8f5 100%);
+        }
+
+        .auth-wrapper {
+            min-height: 100vh;
+            padding: 28px;
+            gap: 28px;
+        }
+
+        .auth-wrapper-left {
+            border-radius: 28px;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(8, 65, 46, 0.88), rgba(3, 157, 85, 0.72)),
+                url({{ asset('public/assets/admin/css/images/auth-bg.png') }}) no-repeat center/cover;
+            box-shadow: 0 24px 70px rgba(21, 51, 42, 0.16);
+            min-height: calc(100vh - 56px);
+        }
+
+        .auth-wrapper-left .auth-left-cont {
+            margin-inline-start: 0;
+            margin-inline-end: 0;
+            max-width: 560px;
+            padding: 48px;
+            color: #fff;
+        }
+
+        .auth-wrapper-left .auth-left-cont img {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 18px;
+            padding: 12px 16px;
+            max-width: 210px;
+            height: 76px;
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.16);
+        }
+
+        .auth-wrapper-left .auth-left-cont .title {
+            color: #fff;
+            font-size: 56px;
+            letter-spacing: 0;
+            max-width: 640px;
+        }
+
+        .auth-wrapper-left .auth-left-cont .title .text--039D55 {
+            color: #dff8eb !important;
+        }
+
+        .auth-wrapper-right {
+            max-width: 560px;
+            min-height: calc(100vh - 56px);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(220, 232, 226, 0.9);
+            box-shadow: 0 24px 70px rgba(21, 51, 42, 0.14);
+            padding: 34px;
+            position: relative;
+            align-content: center;
+        }
+
+        .auth-wrapper-right .__login-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            border-radius: 999px;
+            background: var(--fasta-login-soft);
+            color: var(--fasta-login-primary);
+            border: 1px solid rgba(3, 157, 85, 0.18);
+            padding: 9px 13px;
+            font-weight: 600;
+        }
+
+        .auth-wrapper-right .auth-wrapper-form {
+            max-width: 430px;
+            padding: 24px 0 6px;
+        }
+
+        .auth-wrapper-right .auth-header {
+            color: var(--fasta-login-muted);
+            margin-bottom: 32px;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        .auth-wrapper-right .auth-header .title {
+            color: var(--fasta-login-ink);
+            font-size: 34px;
+            line-height: 1.15;
+            margin-bottom: 8px;
+        }
+
+        .auth-wrapper-right .input-label {
+            color: var(--fasta-login-ink);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-wrapper-right .form-control,
+        .auth-wrapper-right .input-group-text {
+            height: 52px !important;
+            border-radius: 14px;
+            border-color: var(--fasta-login-line);
+            background: #fbfdfc;
+            color: var(--fasta-login-ink);
+        }
+
+        .auth-wrapper-right .input-group-merge .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .auth-wrapper-right .input-group-merge .input-group-text {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .auth-wrapper-right .form-control:focus {
+            border-color: rgba(3, 157, 85, 0.55);
+            box-shadow: 0 0 0 4px rgba(3, 157, 85, 0.11);
+            background: #fff;
+        }
+
+        .auth-wrapper-right .custom-control-label,
+        .auth-wrapper-right .text-primary {
+            color: var(--fasta-login-muted) !important;
+        }
+
+        .auth-wrapper-right .text-hover--primary:hover {
+            color: var(--fasta-login-primary) !important;
+        }
+
+        .auth-wrapper-right .btn--primary {
+            height: 52px !important;
+            border-radius: 14px;
+            background: var(--fasta-login-primary);
+            border-color: var(--fasta-login-primary);
+            box-shadow: 0 14px 26px rgba(3, 157, 85, 0.22);
+            font-weight: 700;
+        }
+
+        .auth-wrapper-right .btn--primary:hover {
+            filter: brightness(0.94);
+            box-shadow: 0 16px 30px rgba(3, 157, 85, 0.28);
+        }
+
+        .auth-wrapper-right .auto-fill-data-copy {
+            margin-top: 22px;
+            padding: 16px;
+            border: 1px solid var(--fasta-login-line);
+            border-radius: 16px;
+            background: var(--fasta-login-soft);
+            color: var(--fasta-login-muted);
+        }
+
+        .auth-wrapper-right .auto-fill-data-copy .action-btn {
+            border-radius: 12px;
+        }
+
+        .modal-content {
+            border-radius: 22px;
+            border: 0;
+            box-shadow: 0 24px 70px rgba(21, 51, 42, 0.18);
+        }
+
+        .close-modal-icon {
+            border-radius: 12px;
+        }
+
+        @media (min-width: 1550px) {
+            .auth-wrapper-right .auth-wrapper-form {
+                transform: none;
+            }
+            .auth-wrapper-right .btn-block,
+            .auth-wrapper-right .form-control {
+                border-radius: 14px;
+                height: 52px !important;
+            }
+        }
+
+        @media (max-width: 1300px) {
+            .auth-wrapper-left .auth-left-cont .title {
+                font-size: 42px;
+            }
+            .auth-wrapper-right .auth-header .title {
+                font-size: 30px;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .auth-wrapper {
+                padding: 14px;
+            }
+            .auth-wrapper-right {
+                border-radius: 22px;
+                min-height: calc(100vh - 28px);
+                padding: 26px 20px;
+            }
+            .auth-wrapper-right .__login-badge {
+                position: static;
+                margin: 0 auto 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -40,10 +254,6 @@
             </div>
         </div>
         <div class="auth-wrapper-right">
-            <label class="badge badge-soft-success __login-badge">
-                {{translate('messages.software_version')}} : {{env('SOFTWARE_VERSION')}}
-            </label>
-
             <!-- Card -->
             <div class="auth-wrapper-form">
                 <div class="d-sm-none flex-grow-1 mb-2">

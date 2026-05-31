@@ -60,13 +60,28 @@
                     @if (\App\CentralLogics\Helpers::module_permission_check('zone'))
                         <li
                             class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/zone*') ? 'active' : '' }}">
-                            <a class="js-navbar-vertical-aside-menu-link nav-link"
-                                href="{{ route('admin.business-settings.zone.home') }}"
+                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle"
+                                href="javascript:"
                                 title="{{ translate('messages.zone_setup') }}">
                                 <i class="tio-city nav-icon"></i>
                                 <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                     {{ translate('messages.zone_setup') }} </span>
                             </a>
+                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
+                                style="display:{{ Request::is('admin/business-settings/zone*') ? 'block' : 'none' }}">
+                                <li class="{{ Request::is('admin/business-settings/zone') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('admin.business-settings.zone.home') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('Zones') }}</span>
+                                    </a>
+                                </li>
+                                <li class="{{ Request::is('admin/business-settings/zone/micro-zones*') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('admin.business-settings.zone.micro-zones.index') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('Micro Zones') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     @endif
 
@@ -183,6 +198,16 @@
                                         <span class="tio-circle nav-indicator-icon"></span>
                                         <span class="text-truncate">
                                             {{ translate('messages.Subscriber_List') }}
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/fasta-prime*') ? 'active' : '' }}">
+                                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                                        href="{{ route('admin.business-settings.fasta-prime.index') }}"
+                                        title="{{ translate('Fasta Prime') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{ translate('Fasta Prime') }}
                                         </span>
                                     </a>
                                 </li>
@@ -609,6 +634,17 @@
                                 <i class="tio-cloud nav-icon"></i>
                                 <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                     {{ translate('messages.clean_database') }}
+                                </span>
+                            </a>
+                        </li>
+                        <li
+                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/system-maintenance*') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link"
+                                href="{{ route('admin.business-settings.system-maintenance.index') }}"
+                                title="{{ translate('System Maintenance') }}">
+                                <i class="tio-settings nav-icon"></i>
+                                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                                    {{ translate('System Maintenance') }}
                                 </span>
                             </a>
                         </li>

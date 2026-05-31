@@ -16,9 +16,11 @@ class DMVehicle extends Model
     protected $casts = [
         'id' => 'integer',
         'status' => 'integer',
+        'module_id' => 'integer',
         'extra_charges' => 'float',
         'starting_coverage_area' => 'float',
         'maximum_coverage_area' => 'float',
+        'maximum_weight' => 'float',
     ];
 
     protected $appends = ['image_full_url'];
@@ -54,6 +56,11 @@ class DMVehicle extends Model
     public function tripFares()
     {
         return $this->hasMany(RideFare::class, 'vehicle_category_id');
+    }
+
+    public function module()
+    {
+        return $this->belongsTo(Module::class, 'module_id');
     }
 
     public function scopeActive($query)
