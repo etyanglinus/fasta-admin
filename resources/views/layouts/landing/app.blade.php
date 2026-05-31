@@ -278,6 +278,7 @@
                 <div>
                     <h5>{{ translate('Links of Interest') }}</h5>
                     <div class="f-links">
+                        <a href="{{ route('developers') }}">{{ translate('Developers') }}</a>
                         @forelse($custom_landing_pages as $customPage)
                             <a href="{{ route('page.show', $customPage->slug) }}">{{ $customPage->title }}</a>
                         @empty

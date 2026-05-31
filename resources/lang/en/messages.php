@@ -11581,4 +11581,5 @@ Smartly or Earn. ',
   'The slug field is required.' => 'The slug field is required.',
   'Others' => 'Others',
   'Links of Interest' => 'Links of Interest',
+  'Developers' => 'Developers',
 );

@@ -1,7 +1,7 @@
 @extends('layouts.landing.app')
 
 @section('title', translate('messages.about_us'))
-@section('meta_description', 'About 6amMart Kenya - hyperlocal delivery in Nairobi, supporting local vendors, reliable grocery delivery, and community-first commerce.')
+@section('meta_description', 'About Fasta Deliveries - hyperlocal delivery in Nairobi, supporting local vendors, reliable grocery delivery, and community-first commerce.')
 
 @section('content')
     @php
@@ -61,7 +61,7 @@
                         {!! $data !!}
                     @else
                         <p>
-                            6amMart Kenya was shaped by a simple problem: getting quality groceries, meals, and daily essentials across Nairobi should not depend on long queues, unpredictable traffic, or whether a neighborhood vendor has the tools to sell online.
+                            Fasta Deliveries was shaped by a simple problem: getting quality groceries, meals, and daily essentials should not depend on long queues, unpredictable traffic, or whether a neighborhood vendor has the tools to sell online.
                         </p>
                         <p>
                             We are building a practical bridge between customers, independent vendors, and delivery partners. The goal is not just faster orders. It is a stronger local commerce network where small businesses can compete, customers can trust what arrives, and riders can find dignified earning opportunities.

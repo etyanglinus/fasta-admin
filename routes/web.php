@@ -42,6 +42,7 @@ Route::get('privacy-policy', 'HomeController@privacy_policy')->name('privacy-pol
 Route::get('cancelation', 'HomeController@cancelation')->name('cancelation');
 Route::get('refund', 'HomeController@refund_policy')->name('refund');
 Route::get('shipping-policy', 'HomeController@shipping_policy')->name('shipping-policy');
+Route::view('developers', 'developers-coming-soon')->name('developers');
 
 Route::get('page/{slug}', 'PageController@show')->name('page.show');
 Route::get('blog', 'BlogController@index')->name('blog.index');

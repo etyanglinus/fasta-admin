@@ -1,30 +1,31 @@
 @extends('layouts.landing.app')
 
 @section('title', $pressRelease->title)
+@section('meta_description', $pressRelease->summary)
 
 @section('content')
-    <section class="page-hero">
+    <section class="press-detail-hero">
         <div class="container">
+            <a href="{{ route('press.index') }}" class="press-back">Back to press</a>
+            <span class="press-kicker">{{ optional($pressRelease->publish_date)->format('M d, Y') ?: 'Press Release' }}</span>
             <h1>{{ $pressRelease->title }}</h1>
-            <div class="breadcrumb">
-                <a href="{{ route('home') }}">{{ translate('messages.home') }}</a> /
-                <a href="{{ route('press.index') }}">Press & Media</a> / {{ $pressRelease->title }}
-            </div>
+            @if($pressRelease->summary)
+                <p>{{ $pressRelease->summary }}</p>
+            @endif
         </div>
     </section>
 
-    <section class="page-content">
+    <section class="press-detail-section">
         <div class="container">
-            <div class="content-card">
-                <p class="text-muted">{{ optional($pressRelease->publish_date)->format('M d, Y') }}</p>
+            <article class="press-detail-card">
                 @if($pressRelease->featured_image)
-                    <img src="{{ asset('storage/'.$pressRelease->featured_image) }}" class="img-fluid mb-4" alt="{{ $pressRelease->title }}">
+                    <img src="{{ asset('storage/'.$pressRelease->featured_image) }}" alt="{{ $pressRelease->title }}">
                 @endif
-                <div>{!! $pressRelease->content !!}</div>
+                <div class="press-richtext">{!! $pressRelease->content !!}</div>
                 @if($pressRelease->pdf_file)
-                    <a href="{{ asset('storage/'.$pressRelease->pdf_file) }}" class="btn btn-primary mt-3" target="_blank">Download PDF</a>
+                    <a href="{{ asset('storage/'.$pressRelease->pdf_file) }}" class="press-btn press-btn--primary" target="_blank">Download PDF</a>
                 @endif
-            </div>
+            </article>
         </div>
     </section>
 @endsection
