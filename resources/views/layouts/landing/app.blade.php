@@ -29,11 +29,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="{{ asset('public/assets/landing/css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('public/assets/landing/css/odometer.css') }}" />
-    <link rel="stylesheet" href="{{ asset('public/assets/admin/css/toastr.css') }}">
-    <link rel="stylesheet" href="{{ asset('public/assets/landing/css/landing.css') }}"/>
-    <link rel="stylesheet" href="{{asset('public/assets/admin/intltelinput/css/intlTelInput.css')}}">
+    @php
+        $documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+        $publicRoot = realpath(public_path());
+        $isPublicDocumentRoot = $documentRoot && $publicRoot && $documentRoot === $publicRoot;
+        $publicAsset = fn ($path) => asset(($isPublicDocumentRoot ? '' : 'public/') . ltrim($path, '/'));
+    @endphp
+
+    <link rel="stylesheet" href="{{ $publicAsset('assets/landing/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ $publicAsset('assets/landing/css/odometer.css') }}" />
+    <link rel="stylesheet" href="{{ $publicAsset('assets/admin/css/toastr.css') }}">
+    @php($landingCssPath = public_path('assets/landing/css/landing.css'))
+    <link rel="stylesheet" href="{{ $publicAsset('assets/landing/css/landing.css') }}?v={{ file_exists($landingCssPath) ? filemtime($landingCssPath) : time() }}"/>
+    <link rel="stylesheet" href="{{ $publicAsset('assets/admin/intltelinput/css/intlTelInput.css') }}">
 
     @php($backgroundChange = \App\CentralLogics\Helpers::get_business_settings('backgroundChange') ?? [])
     @if (isset($backgroundChange['primary_1_hex']))
@@ -101,7 +109,7 @@
     <nav class="main-nav">
         <div class="container">
             <a href="{{route('home')}}" class="nav-logo">
-                <img class="onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" src="{{ \App\CentralLogics\Helpers::logoFullUrl()}}" alt="image" />
+                <img class="onerror-image" data-onerror-image="{{ $publicAsset('assets/admin/img/160x160/img2.jpg') }}" src="{{ \App\CentralLogics\Helpers::logoFullUrl()}}" alt="image" />
             </a>
             <div class="nav-links">
                 <a href="{{route('home')}}" class="{{ Request::is('/') ? 'active-link' : '' }}">{{ translate('messages.home') }}</a>
@@ -222,7 +230,7 @@
             <div class="footer-grid">
                 <div class="f-brand">
                     <a href="{{route('home')}}" class="nav-logo">
-                        <img class="onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" src="{{\App\CentralLogics\Helpers::logoFullUrl()}}" alt="image" />
+                        <img class="onerror-image" data-onerror-image="{{ $publicAsset('assets/admin/img/160x160/img2.jpg') }}" src="{{\App\CentralLogics\Helpers::logoFullUrl()}}" alt="image" />
                     </a>
                     <p>{{ $fixed_footer_article_title }}</p>
                     <div class="f-social">
@@ -230,7 +238,7 @@
                         @if (isset($social_media))
                             @foreach ($social_media as $social)
                             <a href="{{ $social->link }}" target="_blank" aria-label="{{ $social->name }}">
-                                <img src="{{ asset('public/assets/landing/img/footer/'. $social->name.'.svg') }}" alt="{{ $social->name }}">
+                                <img src="{{ $publicAsset('assets/landing/img/footer/'. $social->name.'.svg') }}" alt="{{ $social->name }}">
                             </a>
                             @endforeach
                         @endif
@@ -305,12 +313,12 @@
         </div>
     </footer>
 
-    <script src="{{ asset('public/assets/landing/js/jquery-3.6.0.min.js') }}"></script>
-    <script src="{{ asset('public/assets/landing/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('public/assets/landing/js/viewport.jquery.js') }}"></script>
-    <script src="{{ asset('public/assets/landing/js/odometer.min.js') }}"></script>
-    <script src="{{ asset('public/assets/admin/js/toastr.js') }}"></script>
-    <script src="{{ asset('public/assets/admin/intltelinput/js/intlTelInput.min.js')}}"></script>
+    <script src="{{ $publicAsset('assets/landing/js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ $publicAsset('assets/landing/js/bootstrap.min.js') }}"></script>
+    <script src="{{ $publicAsset('assets/landing/js/viewport.jquery.js') }}"></script>
+    <script src="{{ $publicAsset('assets/landing/js/odometer.min.js') }}"></script>
+    <script src="{{ $publicAsset('assets/admin/js/toastr.js') }}"></script>
+    <script src="{{ $publicAsset('assets/admin/intltelinput/js/intlTelInput.min.js') }}"></script>
     {!! Toastr::message() !!}
     @if ($errors->any())
         <script>
@@ -346,7 +354,7 @@
             inputs.forEach(input => {
                 const iti = window.intlTelInput(input, {
                     initialCountry: "{{$countryCode}}",
-                    utilsScript: "{{ asset('public/assets/admin/intltelinput/js/utils.js') }}",
+                    utilsScript: "{{ $publicAsset('assets/admin/intltelinput/js/utils.js') }}",
                     autoInsertDialCode: true,
                     nationalMode: false,
                     formatOnDisplay: false,
