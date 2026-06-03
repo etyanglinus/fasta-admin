@@ -239,6 +239,13 @@ class Module extends Model
             ->using(ModuleZone::class);
     }
 
+    public function microZones(): BelongsToMany
+    {
+        return $this->belongsToMany(MicroZone::class, 'module_zone')
+            ->withPivot(['zone_id', 'per_km_shipping_charge','minimum_shipping_charge','maximum_shipping_charge','maximum_cod_order_amount','delivery_charge_type','fixed_shipping_charge'])
+            ->using(ModuleZone::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -292,3 +299,6 @@ class Module extends Model
         });
     }
 }
+
+
+

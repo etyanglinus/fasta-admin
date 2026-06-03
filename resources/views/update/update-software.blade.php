@@ -24,21 +24,21 @@
                                                 <span class="cursor-pointer" data-bs-toggle="tooltip"
                                                       data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                                       data-bs-html="true"
-                                                      data-bs-title="The username of your codecanyon account">
+                                                      data-bs-title="Optional local customization username">
                                                       <img src="{{asset('public/assets/installation')}}/assets/img/svg-icons/info2.svg" class="svg" alt="">
                                                 </span>
                                             </label>
                                             <input type="text" id="username" class="form-control" name="username"
                                                    value="{{env('BUYER_USERNAME')}}"
-                                                   placeholder="Ex: John Doe" required>
+                                                   placeholder="activated">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="from-group">
-                                            <label for="purchase_key" class="mb-2">Purchase Code</label>
+                                            <label for="purchase_key" class="mb-2">Purchase Code (optional)</label>
                                             <input type="text" id="purchase_key" class="form-control" name="purchase_key"
                                                    value="{{env('PURCHASE_CODE')}}"
-                                                   placeholder="Ex: 19xxxxxx-ca5c-49c2-83f6-696a738b0000" required>
+                                                   placeholder="activated">
                                         </div>
                                     </div>
                                 </div>

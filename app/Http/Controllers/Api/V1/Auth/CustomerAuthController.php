@@ -16,6 +16,7 @@ use App\Mail\EmailVerification;
 use App\Models\BusinessSetting;
 use App\CentralLogics\SMS_module;
 use App\Models\WalletTransaction;
+use App\Support\SmartAuthRedirect;
 use App\Models\EmailVerifications;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -631,6 +632,7 @@ class CustomerAuthController extends Controller
                 'password' => $request->password,
                 'guest_id' => $request->guest_id,
                 'field_type' => $request->field_type,
+                'redirect_url' => $request->redirect_url ?? $request->return_url,
             ];
 
             return $this->manual_login($request_data);
@@ -660,7 +662,8 @@ class CustomerAuthController extends Controller
                     'phone' => $request->phone,
                     'guest_id' => $request->guest_id,
                     'otp' =>$request->otp,
-                    'verified' => $request['verified']??'default'
+                    'verified' => $request['verified']??'default',
+                    'redirect_url' => $request->redirect_url ?? $request->return_url
                 ];
 
                 return $this->otp_login($request_data);
@@ -770,7 +773,8 @@ class CustomerAuthController extends Controller
                 'unique_id' => $unique_id,
                 'medium' => $request['medium'],
                 'verified' => $request['verified']??'default',
-                'guest_id' => $request['guest_id']
+                'guest_id' => $request['guest_id'],
+                'redirect_url' => $request->redirect_url ?? $request->return_url
             ];
 
             return $this->social_login($data, $request_data);
@@ -833,7 +837,7 @@ class CustomerAuthController extends Controller
                 }
             }
 
-            return response()->json(['token' => $token, 'is_phone_verified'=> 1, 'is_email_verified'=> 1, 'is_personal_info' => $is_personal_info, 'is_exist_user' => null, 'login_type' => 'manual', 'email' => $user_email], 200);
+            return response()->json($this->withLoginRedirect(['token' => $token, 'is_phone_verified'=> 1, 'is_email_verified'=> 1, 'is_personal_info' => $is_personal_info, 'is_exist_user' => null, 'login_type' => 'manual', 'email' => $user_email], $request_data), 200);
         } else {
             $errors = [];
             array_push($errors, ['code' => 'auth-001', 'message' => translate('User_credential_does_not_match')]);
@@ -899,7 +903,7 @@ class CustomerAuthController extends Controller
                 $user_email = $user->email;
             }
 
-            return response()->json(['token' => $token, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => $is_personal_info, 'is_exist_user' => null, 'login_type' => 'otp', 'email' => $user_email], 200);
+            return response()->json($this->withLoginRedirect(['token' => $token, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => $is_personal_info, 'is_exist_user' => null, 'login_type' => 'otp', 'email' => $user_email], $request_data), 200);
         }
 
         return response()->json([
@@ -928,7 +932,7 @@ class CustomerAuthController extends Controller
             if($user->email){
                 $user_email = $user->email;
             }
-            return response()->json(['token' => $temporaryToken, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => 1, 'is_exist_user' =>$is_exist_user, 'login_type' => 'social', 'email' => $user_email], 200);
+            return response()->json($this->withLoginRedirect(['token' => $temporaryToken, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => 1, 'is_exist_user' =>$is_exist_user, 'login_type' => 'social', 'email' => $user_email], $request_data), 200);
         }
 
         if(($user && $request_data['verified'] == 'no') || (!$user && $request_data['verified'] == 'default')){
@@ -999,7 +1003,7 @@ class CustomerAuthController extends Controller
             if($user->email){
                 $user_email = $user->email;
             }
-            return response()->json(['token' => $token, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => $is_personal_info, 'is_exist_user' =>$is_exist_user, 'login_type' => 'social', 'email' => $user_email], 200);
+            return response()->json($this->withLoginRedirect(['token' => $token, 'is_phone_verified'=>1, 'is_email_verified'=>1, 'is_personal_info' => $is_personal_info, 'is_exist_user' =>$is_exist_user, 'login_type' => 'social', 'email' => $user_email], $request_data), 200);
         } else {
             $errors = [];
             array_push($errors, ['code' => 'auth-001', 'message' => 'Unauthorized.']);
@@ -1009,6 +1013,16 @@ class CustomerAuthController extends Controller
         }
     }
 
+    private function withLoginRedirect(array $payload, array $request_data): array
+    {
+        $redirectUrl = SmartAuthRedirect::resolveLoginRedirect($request_data['redirect_url'] ?? null, request());
+
+        if ($redirectUrl) {
+            $payload['redirect_url'] = $redirectUrl;
+        }
+
+        return $payload;
+    }
     private function verification_check($request_data){
         $firebase_otp_verification = BusinessSetting::where('key', 'firebase_otp_verification')->first()?->value??0;
         if(!$firebase_otp_verification)
@@ -1334,3 +1348,4 @@ class CustomerAuthController extends Controller
     }
 
 }
+

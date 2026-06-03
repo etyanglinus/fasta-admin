@@ -69,7 +69,6 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('social-login', 'SocialAuthController@social_login');
         Route::post('social-register', 'SocialAuthController@social_register');
     });
-
     //Store Subscription
     Route::group(['prefix' => 'vendor','namespace' => 'Vendor'], function () {
         Route::get('package-view', 'SubscriptionController@package_view');
@@ -165,7 +164,6 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('notifications', 'VendorController@get_notifications');
         Route::get('profile', 'VendorController@get_profile');
         Route::get('store-visits', 'VendorController@store_visits');
-        Route::put('custom-domain', 'VendorController@update_custom_domain');
         Route::post('update-active-status', 'VendorController@active_status');
         // Route::get('verified-badge-popup-seen', 'VendorController@verifiedBadgePopupSeen');
         Route::get('earning-info', 'VendorController@get_earning_data');
@@ -359,6 +357,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::post('external-update-data', 'CustomerController@externalUpdateCustomer')->withoutMiddleware(['auth:api','module-check']);
             Route::get('notifications', 'NotificationController@get_notifications');
             Route::get('info', 'CustomerController@info');
+            Route::post('logout', 'CustomerController@logout');
             Route::get('update-zone', 'CustomerController@update_zone');
             Route::post('update-profile', 'CustomerController@update_profile');
             Route::post('update-interest', 'CustomerController@update_interest');
@@ -439,6 +438,14 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
                 Route::post('wallet-payment', 'OrderController@walletPayment');
                 Route::get('payment-failed', 'CustomerController@orderPaymentFailed');
 
+            });
+
+            Route::group(['prefix'=>'group-order'], function() {
+                Route::post('start', 'GroupOrderController@start');
+                Route::post('{code}/join', 'GroupOrderController@join');
+                Route::get('{code}', 'GroupOrderController@show');
+                Route::post('{code}/lock', 'GroupOrderController@lock');
+                Route::post('{code}/cancel', 'GroupOrderController@cancel');
             });
 
             Route::group(['prefix'=>'cart'], function() {
@@ -557,3 +564,5 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
     Route::get('get-page-meta-data', [ConfigController::class, 'getPageMetaData']);
 });
+
+

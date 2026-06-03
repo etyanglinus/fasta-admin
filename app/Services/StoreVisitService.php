@@ -8,7 +8,7 @@ class StoreVisitService
 {
     public static function record(int $storeId, string $source = 'web'): void
     {
-        $source = in_array($source, ['app', 'web', 'custom_domain'], true) ? $source : 'web';
+        $source = in_array($source, ['app', 'web'], true) ? $source : 'web';
 
         StoreVisitLog::firstOrCreate(
             ['store_id' => $storeId, 'visit_date' => now()->toDateString(), 'source' => $source],

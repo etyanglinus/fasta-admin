@@ -131,6 +131,23 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="form-group mb-0">
+                            <label class="input-label">{{ translate('Choose_Micro_Zone_To_Connect_Modules') }}</label>
+                            <select name="micro_zone_id" id="choice_micro_zone" class="form-control js-select2-custom" onchange="window.location='{{ route('admin.business-settings.zone.module-setup', $zone->id) }}?micro_zone_id='+this.value">
+                                @forelse($microZones ?? [] as $microZone)
+                                    <option value="{{ $microZone->id }}" {{ (int) $selectedMicroZoneId === $microZone->id ? 'selected' : '' }}>{{ $microZone->name }}</option>
+                                @empty
+                                    <option value="">{{ translate('No_micro_zone_found_for_this_zone') }}</option>
+                                @endforelse
+                            </select>
+                            <small class="text-muted">{{ translate('Modules_selected_below_will_be_available_only_in_this_micro_zone.') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-2">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group mb-0">
                             <label class="input-label"
                                    for="exampleFormControlSelect1">{{ translate('Choose_Business_Module_To_Connect') }}
                                 <span
@@ -140,7 +157,7 @@
                                     multiple="multiple">
 
                                 @php($modules = \App\Models\Module::get(['id', 'module_name','module_type']))
-                                @php($selected_modules = count($zone->modules) > 0 ? $zone->modules->pluck('id')->toArray() : [])
+                                @php($selected_modules = $selectedMicroZoneId ? \App\Models\ModuleZone::where('zone_id', $zone->id)->where('micro_zone_id', $selectedMicroZoneId)->pluck('module_id')->toArray() : (count($zone->modules) > 0 ? $zone->modules->pluck('id')->toArray() : []))
                                 @foreach ($modules as $module)
                                     <option value="{{ $module['id'] }}"
                                         {{ in_array($module['id'], $selected_modules) ? 'selected' : '' }}>
@@ -159,7 +176,7 @@
             @endif
             @if (count($modules) > 0)
                 @foreach ($modules as $module)
-                    @php($pivot = \App\Models\ModuleZone::where('zone_id', $zone->id)->where('module_id', $module->id)->first())
+                    @php($pivot = \App\Models\ModuleZone::where('zone_id', $zone->id)->when($selectedMicroZoneId, fn($query) => $query->where('micro_zone_id', $selectedMicroZoneId))->where('module_id', $module->id)->first())
                     @if ($module->module_type == 'parcel')
                         <div class="col-md-12 mb-2" id="module_{{ $module->id }}">
                             <div class="module-row card view-details-container overflow-hidden">
@@ -210,48 +227,10 @@
                                         <div class="gap-1 d-flex align-items-center">
                                             <i class="tio-light-on theme-clr-dark fs-16"></i>
                                             <p class="m-0 fs-12">
-                                                {{ translate('Rental module doesn’t support delivery charges. You can set trip fare per vehicle from:') }}
+                                                {{ translate('Rental module doesnÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢t support delivery charges. You can set trip fare per vehicle from:') }}
                                                 <a href="{{ route('admin.rental.provider.vehicle.list', ['module_id' => $module->id]) }}"
                                                    class="font-semibold text-title">
                                                    {{ translate('Rental Module') }} > {{ translate('Vehicle Management') }} > {{ translate('Vehicle Setup') }} > {{ translate('List') }}
-                                                </a>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <input type="hidden" value="distance"
-                               name="module_data[{{ $module->id }}][delivery_charge_type]">
-                        <input type="hidden" name="module_data[{{ $module->id }}][fixed_shipping_charge]"
-                               value="{{ $pivot?->fixed_shipping_charge ?? 0 }}">
-                        <input type="hidden" name="module_data[{{ $module->id }}][per_km_shipping_charge]"
-                               value="{{ $pivot?->per_km_shipping_charge ?? 0 }}">
-                        <input type="hidden" name="module_data[{{ $module->id }}][minimum_shipping_charge]"
-                               value="{{ $pivot?->minimum_shipping_charge ?? 0 }}">
-                        <input type="hidden" name="module_data[{{ $module->id }}][maximum_shipping_charge]"
-                               value="{{ $pivot?->maximum_shipping_charge ?? 0 }}">
-                        <input type="hidden" name="module_data[{{ $module->id }}][maximum_cod_order_amount]"
-                               value="{{ $pivot?->maximum_cod_order_amount ?? 0 }}">
-
-                    @elseif ($module->module_type == 'ride-share' && addon_published_status('RideShare'))
-                        <div class="col-md-12 mb-2" id="module_{{ $module->id }}">
-                            <div class="module-row card view-details-container overflow-hidden">
-                                <a href="#0"
-                                   class="card-header border-0 view-btn d-flex align-items-center justify-content-between flex-wrap gap-1">
-                                    <h5 class="m-0">{{ $module->module_name }}</h5>
-                                    <i class="tio-chevron-down fs-24 text-title"></i>
-                                </a>
-                                <div class="card-body view-details border-top">
-                                    <div
-                                        class="bg-opacity-primary-10 rounded py-2 px-3 d-flex flex-wrap gap-1 align-items-center">
-                                        <div class="gap-1 d-flex align-items-center">
-                                            <i class="tio-light-on theme-clr-dark fs-16"></i>
-                                            <p class="m-0 fs-12">
-                                                {{ translate('RideShare module doesn’t support delivery charges. You can set trip fare per zone from:') }}
-                                                <a href="{{ route('admin.ride-share.fare.trip.index', ['module_id' => $module->id]) }}"
-                                                   class="font-semibold text-title">
-                                                   {{ translate('RideShare Module') }} > {{ translate('Fare Management') }} > {{ translate('Trip Fare Setup') }}
                                                 </a>
                                             </p>
                                         </div>
@@ -471,3 +450,4 @@
 
     </script>
 @endpush
+

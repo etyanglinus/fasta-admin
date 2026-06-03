@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Traits\AddonHelper;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\View;
 use App\CentralLogics\Helpers;
 use Illuminate\Http\Request;
 
@@ -19,10 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
     }
-
-    /**
+/**
      * Bootstrap any application services.
      *
      * @return void
@@ -61,3 +60,4 @@ class AppServiceProvider extends ServiceProvider
 
     }
 }
+

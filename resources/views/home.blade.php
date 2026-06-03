@@ -24,15 +24,6 @@
                     {{ translate('Join as a Delivery Partner') }}
                 </a>
                 @endif
-                @if (addon_published_status('RideShare'))
-                    @php($toggle_rider_reg = \App\CentralLogics\Helpers::get_data_settings(RIDE_SHARE_BUSINESS_SETTINGS, 'toggle_rider_registration')?->value ?? false)
-                    @if ($toggle_rider_reg == 1)
-                    <a href="{{ route('rider.create') }}" class="hero-btn hero-btn--delivery">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2-4H7L5 10l-2.5 1.1C1.7 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
-                        {{ translate('Join as a Rider') }}
-                    </a>
-                    @endif
-                @endif
             </div>
         </div>
         <div class="hero-illustration">
@@ -223,33 +214,6 @@
                     </div>
                 </div>
 
-                <!-- Rider Card -->
-                @if(addon_published_status('RideShare'))
-                <div class="earn-card">
-                    @if(!empty($landing_data['rider_card_image']))
-                        <div class="earn-card-icon"><img src="{{ $landing_data['rider_card_image'] }}" alt="" style="width:44px;height:44px;object-fit:contain"></div>
-                    @else
-                        <div class="earn-card-icon">&#x1F697;</div>
-                    @endif
-                    <h3>{!! \App\CentralLogics\Helpers::highlight($landing_data['rider_card_title'] ?? translate('messages.Become a smart') . ' $' . translate('messages.Rider') . '$') !!}</h3>
-                    <p>{!! \App\CentralLogics\Helpers::highlight($landing_data['rider_card_subtitle'] ?? translate('Drive and earn on your own terms. Flexible rides, great pay, and easy-to-use tools.')) !!}</p>
-                    @php($join_as_rider = $landing_data['rider_app_earning_links'])
-                    <div class="earn-app-row">
-                        @if (isset($join_as_rider['playstore_url_status']) && $join_as_rider['playstore_url_status'] == '1')
-                        <a href="{{ isset($join_as_rider['playstore_url']) ? $join_as_rider['playstore_url'] : '' }}" class="app-btn">
-                            <img src="{{ asset('/public/assets/landing/img/google-play.png') }}" alt="Google Play" />
-                            <span class="ab-text"><span class="ab-sm">{{ translate('Get it on') }}</span><span class="ab-lg">{{ translate('Google Play') }}</span></span>
-                        </a>
-                        @endif
-                        @if (isset($join_as_rider['apple_store_url_status']) && $join_as_rider['apple_store_url_status'] == '1')
-                        <a href="{{ isset($join_as_rider['apple_store_url']) ? $join_as_rider['apple_store_url'] : '' }}" class="app-btn">
-                            <img src="{{ asset('/public/assets/landing/img/apple-store.png') }}" alt="App Store" />
-                            <span class="ab-text"><span class="ab-sm">{{ translate('Download on the') }}</span><span class="ab-lg">{{ translate('App Store') }}</span></span>
-                        </a>
-                        @endif
-                    </div>
-                </div>
-                @endif
             </div>
                 <div class="slider-nav">
                     <button class="slider-arrow slider-prev" data-target=".earn-grid">&#8592;</button>
@@ -307,15 +271,6 @@
                     <div class="stat-num" data-t="{{ $counter['deliveryman_count_numbers'] ?? 0 }}">0<span class="plus">+</span></div>
                     <div class="stat-label">{{ translate('messages.Deliveryman') }}</div>
                 </div>
-                @if(addon_published_status('RideShare'))
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                    </div>
-                    <div class="stat-num" data-t="{{ $counter['rider_count_numbers'] ?? 0 }}">0<span class="plus">+</span></div>
-                    <div class="stat-label">{{ translate('messages.Rider') }}</div>
-                </div>
-                @endif
                 <div class="stat-card">
                     <div class="stat-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
@@ -570,3 +525,4 @@
     @endif
 </script>
 @endpush
+

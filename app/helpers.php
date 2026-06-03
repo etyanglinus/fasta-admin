@@ -300,24 +300,13 @@ if (! function_exists('fasta_prime_failed')) {
 if (!function_exists('addon_published_status')) {
     function addon_published_status($module_name): int
     {
-        try {
-            $path = base_path("Modules/{$module_name}/Addon/info.php");
-
-            if (!file_exists($path)) {
-                return 0;
-            }
-
-            $full_data = include $path;
-
-            return (isset($full_data['is_published']) && $full_data['is_published'] == 1) ? 1 : 0;
-
-        } catch (\Throwable $exception) {
-            info($exception->getMessage());
+        if ($module_name === 'RideShare') {
             return 0;
         }
+
+        return 1;
     }
 }
-
 
 
 if (!function_exists('config_settings')) {

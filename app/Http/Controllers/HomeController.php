@@ -594,17 +594,17 @@ class HomeController extends Controller
 
     public function getActivationCheckView(Request $request)
     {
-        return view('installation.activation-check');
+        return redirect(url('/'));
     }
 
     public function activationCheck(Request $request)
     {
-        $response = $this->getRequestConfig(
-            username: $request['username'],
-            purchaseKey: $request['purchase_key'],
-            softwareType: $request->get('software_type', base64_decode('cHJvZHVjdA=='))
-        );
-        $this->updateActivationConfig(app: 'admin_panel', response: $response);
+        $this->updateActivationConfig(app: 'admin_panel', response: $this->getRequestConfig(
+            username: $request['username'] ?? 'activated',
+            purchaseKey: $request['purchase_key'] ?? 'activated',
+            softwareType: $request->get('software_type', 'product')
+        ));
+
         return redirect(url('/'));
     }
 }

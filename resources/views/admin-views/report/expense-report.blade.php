@@ -257,7 +257,7 @@
                                     @if ($exp->ride)
 
                                     <div>
-                                        <a class="text-dark" href="{{ route('admin.ride-share.ride.show', $exp->ride->ref_id) }}">{{ $exp->ride->ref_id }}</a>
+                                        <span class="text-dark">{{ $exp->ride->ref_id }}</span>
                                     </div>
                                     </div>
                                     @else
@@ -448,4 +448,5 @@
         });
     </script>
 @endpush
+
 

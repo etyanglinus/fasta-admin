@@ -26,6 +26,8 @@ use MatanYadaev\EloquentSpatial\Objects\Point;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Contracts\Repositories\TranslationRepositoryInterface;
 use App\Models\Module;
+use App\Models\MicroZone;
+use App\Models\ModuleZone;
 use App\Models\Currency;
 use App\Models\Setting;
 use App\Models\Zone as ZoneModel;
@@ -163,7 +165,7 @@ class ZoneController extends BaseController
     {
         $zone = $this->zoneRepo->getFirstWhere(
             params: ['id' => $id],
-            relations: ['modules', 'paymentGateways']
+            relations: ['modules', 'paymentGateways', 'microZones']
         );
         $cash_on_delivery = Helpers::get_business_settings('cash_on_delivery');
         $digital_payment = Helpers::get_business_settings('digital_payment');
@@ -174,13 +176,16 @@ class ZoneController extends BaseController
             ->get(['key_name', 'additional_data']);
         $selectedPaymentGateways = $zone->paymentGateways->where('status', 1)->pluck('gateway_key')->toArray();
 
-        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways'));
+        $microZones = MicroZone::where('zone_id', $zone->id)->active()->orderBy('name')->get();
+        $selectedMicroZoneId = request('micro_zone_id') ?: ($microZones->first()?->id);
+
+        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways', 'microZones', 'selectedMicroZoneId'));
     }
 
     public function getLatestModuleSetupView(): View
     {
         $zone = $this->zoneRepo->getLatest(
-            relations: ['modules', 'paymentGateways']
+            relations: ['modules', 'paymentGateways', 'microZones']
         );
         $cash_on_delivery = Helpers::get_business_settings('cash_on_delivery');
         $digital_payment = Helpers::get_business_settings('digital_payment');
@@ -191,7 +196,10 @@ class ZoneController extends BaseController
             ->get(['key_name', 'additional_data']);
         $selectedPaymentGateways = $zone?->paymentGateways?->where('status', 1)->pluck('gateway_key')->toArray() ?? [];
 
-        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways'));
+        $microZones = MicroZone::where('zone_id', $zone->id)->active()->orderBy('name')->get();
+        $selectedMicroZoneId = request('micro_zone_id') ?: ($microZones->first()?->id);
+
+        return view(ZoneViewPath::MODULE_SETUP[VIEW], compact('zone', 'cash_on_delivery', 'digital_payment', 'offline_payment', 'currencies', 'paymentGateways', 'selectedPaymentGateways', 'microZones', 'selectedMicroZoneId'));
     }
 
     public function updateModuleSetup(ZoneModuleUpdateRequest $request, $id): RedirectResponse

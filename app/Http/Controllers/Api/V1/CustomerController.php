@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\PhoneVerification;
 use App\Models\User;
 use App\Models\UserInfo;
+use App\Support\SmartAuthRedirect;
 use App\Models\Zone;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -513,6 +514,19 @@ class CustomerController extends Controller
         return response()->json([], 200);
     }
 
+    public function logout(Request $request)
+    {
+        $redirectUrl = SmartAuthRedirect::resolveLogoutRedirect($request->current_url ?: $request->redirect_url ?: $request->return_url, $request);
+
+        if ($request->user()?->token()) {
+            $request->user()->token()->revoke();
+        }
+
+        return response()->json([
+            'message' => 'Successfully logged out',
+            'redirect_url' => $redirectUrl,
+        ], 200);
+    }
     public function remove_account(Request $request)
     {
         $user = $request->user();
@@ -997,3 +1011,4 @@ class CustomerController extends Controller
 
     }
 }
+

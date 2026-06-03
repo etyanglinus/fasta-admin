@@ -10,7 +10,7 @@
                 <h1 class="page-header-title">
                     <i class="tio-chart-bar-4"></i> {{ translate('Store Analytics') }}
                 </h1>
-                <p class="page-header-text">{{ translate('Daily visitors from app, web, and custom domains.') }}</p>
+                <p class="page-header-text">{{ translate('Daily visitors from app and web.') }}</p>
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
                 <h2 class="mb-0">{{ number_format($totalVisits) }}</h2>
             </div></div>
         </div>
-        @foreach(['app' => 'App', 'web' => 'Web', 'custom_domain' => 'Custom Domain'] as $source => $label)
+        @foreach(['app' => 'App', 'web' => 'Web'] as $source => $label)
             <div class="col-md-2">
                 <div class="card h-100"><div class="card-body">
                     <div class="text-muted">{{ translate($label) }}</div>
@@ -64,7 +64,6 @@
                         <th>{{ translate('Date') }}</th>
                         <th>{{ translate('App') }}</th>
                         <th>{{ translate('Web') }}</th>
-                        <th>{{ translate('Custom Domain') }}</th>
                         <th>{{ translate('Total') }}</th>
                     </tr>
                 </thead>
@@ -74,7 +73,6 @@
                             <td>{{ $date }}</td>
                             <td>{{ number_format($items->where('source', 'app')->sum('visit_count')) }}</td>
                             <td>{{ number_format($items->where('source', 'web')->sum('visit_count')) }}</td>
-                            <td>{{ number_format($items->where('source', 'custom_domain')->sum('visit_count')) }}</td>
                             <td>{{ number_format($items->sum('visit_count')) }}</td>
                         </tr>
                     @empty

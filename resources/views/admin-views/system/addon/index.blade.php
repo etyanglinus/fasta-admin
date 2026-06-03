@@ -44,7 +44,7 @@
                                     <div class="">
                                         <img src="{{asset('public/assets/admin/img/addon_setting.png')}}" loading="lazy" alt="" class="dark-support rounded mb-4 mw-100">
                                         <ol>
-                                            <li>{{translate('After purchasing the ')}} <strong>{{translate('Payment & SMS Module/ Rental Module/ Ride Share Module')}}</strong> {{translate('from Codecanyon, you will find a file download option.')}}</li>
+                                            <li>{{translate('Upload the ')}} <strong>{{translate('Payment & SMS Module/ Rental Module/ Ride Share Module')}}</strong> {{translate('zip file and enable it directly from this panel.')}}</li>
                                             <li>{{translate('Download the file. It will be downloaded as Zip format Filename.Zip.')}}</li>
                                             <li>{{translate('Extract the file and you will get another file name Filename.zip.')}}</li>
                                             <li>{{translate('Upload the file here and your Addon uploading is complete !')}}</li>
@@ -224,8 +224,8 @@
                                             class="form-control" placeholder="{{ translate('codecanyon_username') }}">
                                 </div>
                                 <div class="form-group">
-                                    <input type="text" name="purchase_code" value=""
-                                            class="form-control" placeholder="{{ translate('purchase_code') }}">
+                                    <input type="text" name="purchase_code" value="activated"
+                                            class="form-control" placeholder="activated">
                                     <input type="text" name="path" class="form-control" value="" hidden>
                                 </div>
 

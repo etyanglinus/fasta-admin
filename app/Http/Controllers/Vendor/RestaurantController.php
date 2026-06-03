@@ -8,9 +8,6 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\Translation;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
-
 class RestaurantController extends Controller
 {
     public function view()
@@ -33,22 +30,14 @@ class RestaurantController extends Controller
             'name.0' => 'required',
             'address' => 'nullable|max:1000',
             'contact' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:stores,phone,'.Helpers::get_store_id(),
-            'custom_domain' => [
-                'nullable',
-                'max:191',
-                'regex:/^(?!https?:\/\/)(?!www\.)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i',
-                Rule::unique('stores', 'custom_domain')->ignore(Helpers::get_store_id()),
-            ],
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'name.0.required'=>translate('default_name_is_required'),
-            'custom_domain.regex' => translate('Please enter only the domain, for example freshmart.co.ke'),
         ]);
         $shop = Store::findOrFail(Helpers::get_store_id());
         $shop->name = $request->name[array_search('default', $request->lang)];
         $shop->address = $request->address[array_search('default', $request->lang)];
         $shop->phone = $request->contact;
-        $shop->custom_domain = $request->custom_domain ? Str::lower(trim($request->custom_domain)) : null;
 
         $shop->logo = $request->has('image') ? Helpers::update('store/', $shop->logo, 'png', $request->file('image')) : $shop->logo;
 

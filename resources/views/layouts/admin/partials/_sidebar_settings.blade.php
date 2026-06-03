@@ -567,19 +567,7 @@
                                 <span class="text-truncate">{{ translate('messages.websocket') }}</span>
                             </a>
                         </li>
-
-                        <li
-                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/addon-activation*') ? 'active' : '' }}">
-                            <a class="nav-link "
-                                href="{{ route('admin.business-settings.addon-activation.index') }}"
-                                title="{{ translate('messages.Addon_Activation') }}">
-                                <span class="tio-appointment nav-icon"></span>
-                                <span class="text-truncate">{{ translate('messages.Addon_Activation') }}</span>
-                            </a>
-                        </li>
-
-
-                        @if (addon_published_status('Rental'))
+@if (addon_published_status('Rental'))
                             <li class="navbar-vertical-aside-has-menu @yield('notification_setup_type')">
                                 <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" id="tourb-3"
                                     href="javascript:" title="{{ translate('messages.notification_setup') }}">

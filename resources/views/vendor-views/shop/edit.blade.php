@@ -123,16 +123,6 @@
                                         <input type="tel" name="contact" value="{{$shop->phone}}" class="form-control" id="name"
                                                 required>
                                     </div>
-                                    <div class="form-group mt-2">
-                                        <label for="custom_domain">{{ translate('Custom Domain') }}</label>
-                                        <input type="text" name="custom_domain" value="{{ old('custom_domain', $shop->custom_domain) }}" class="form-control" id="custom_domain" placeholder="shop.example.com">
-                                        <small class="form-text text-muted">
-                                            {{ translate('Enter only the domain. Point the domain DNS to this server, then visitors will be sent to your web catalog.') }}
-                                            @if($shop->slug)
-                                                <a href="{{ route('shop.redirect', $shop->slug) }}" target="_blank">{{ translate('Preview catalog link') }}</a>
-                                            @endif
-                                        </small>
-                                    </div>
                                 </div>
 
                             </div>

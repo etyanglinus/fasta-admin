@@ -38,9 +38,6 @@ $countryCode = strtolower($country ? $country : 'auto');
     @if (!isset($module_type))
     @php($module_type = Config::get('module.current_module_type'))
     @endif
-    @if(addon_published_status('RideShare') && in_array($module_type, ['ride-share', 'settings', 'transactions']))
-        <link rel="stylesheet" href="{{ asset('Modules/RideShare/public/assets/css/ride-share.css') }}">
-    @endif
     @if(addon_published_status('ReelsModule'))
         <link rel="stylesheet" href="{{ asset('Modules/ReelsModule/public/assets/css/reels.css') }}">
     @endif
@@ -87,7 +84,7 @@ $countryCode = strtolower($country ? $country : 'auto');
     @php($module_type = 'settings')
     @endif
 
-    @if(in_array($module_type, ['rental', 'ride-share']))
+    @if($module_type === 'rental')
         @include("{$module_type}::admin.partials._sidebar_{$module_type}")
     @else
         @include("layouts.admin.partials._sidebar_{$module_type}")
@@ -285,44 +282,6 @@ $countryCode = strtolower($country ? $country : 'auto');
                 </div>
             </div>
         </div>
-
-
-        {{--safetyAlertNotificationModal--}}
-        <div class="modal fade" id="safetyAlertNotificationModal" aria-modal="true" role="dialog">
-            <div class="modal-dialog status-warning-modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span aria-hidden="true" class="tio-clear"></span>
-                        </button>
-                    </div>
-                    <div class="modal-body pb-5 pt-0">
-                        <div class="max-349 mx-auto">
-                            <div>
-                                <div class="text-center">
-                                    <img alt="" class="mb-4" id="deleteIcon"
-                                        src="{{asset('Modules/RideShare/public/assets/img/ride-share/safety-alert-shield-icon-red.png')}}">
-                                    <h5 class="modal-title mb-3" id="safetyAlertNotificationTitle"></h5>
-                                </div>
-                                <div class="text-center mb-4 pb-2">
-                                    <p id="safetyAlertNotificationSubtitle"></p>
-                                </div>
-                            </div>
-                            <div class="btn--container justify-content-center mt-3">
-                                <button id="checkLater"
-                                    class="btn btn--cancel min-w-120 fs-14 fw-semibold">{{ translate('Check Later') }}</button>
-                                <a href=""
-                                    class="show-safety-alert-user-details btn btn-primary min-w-120 confirm-Toggle fs-14 fw-semibold"
-                                    data-user-id="">
-                                    {{ translate('View Alert') }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!--- Global Image -->
         <div id="imageModal" class="imageModal modal fade" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -386,9 +345,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
         <script src="{{asset('public/assets/admin/js/upload-single-image.js')}}"></script>
         <script src="{{asset('public/assets/admin/js/multiple-file-upload.js')}}"></script>
         <script src="{{asset('public/assets/admin/intltelinput/js/intlTelInput.min.js')}}"></script>
-        @if(addon_published_status('RideShare') && in_array($module_type, ['ride-share', 'settings', 'transactions']))
-            <script src="{{ asset('Modules/RideShare/public/assets/js/ride-share.js') }}"></script>
-        @endif
 
         {!! Toastr::message() !!}
 
@@ -415,9 +371,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
         <audio id="myAudio">
             <source src="{{asset('public/assets/admin/sound/notification.mp3')}}" type="audio/mpeg">
         </audio>
-        <audio id="safetyAlertAudio">
-            <source src="{{asset('public/assets/admin/sound/safety-alert.mp3')}}" type="audio/mpeg">
-        </audio>
         <script>
             var audio = document.getElementById("myAudio");
             var isPlaying = false;
@@ -427,17 +380,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
 
             function pauseAudio() {
                 audio.pause();
-            }
-
-            var safetyAlertAudio = document.getElementById("safetyAlertAudio");
-            function playSafetyAlertAudio() {
-                safetyAlertAudio.play();
-                isPlaying = true;
-            }
-            function pauseSafetyAlertAudio() {
-                safetyAlertAudio.pause();
-                isPlaying = false;
-                safetyAlertAudio.currentTime = 0; // Reset to the start
             }
             "use strict";
 
@@ -653,9 +595,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
                         // console.log('FCM Token:', token);
                         // Send the token to your backend to subscribe to topic
                         subscribeTokenToBackend(token, 'admin_message');
-                        @if(addon_published_status('RideShare'))
-                            subscribeTokenToBackend(token, 'admin_safety_alert_notification');
-                        @endif
             }).catch(function (error) {
                             console.error('Error getting permission or token:', error);
                         });
@@ -752,11 +691,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
                         if (new_order_type === 'trip') {
                             document.querySelector('.update_notification_text').textContent = "{{translate('messages.You have new trip, Check Please.')}}";
                         }
-                        @if(addon_published_status('RideShare'))
-                            if (new_order_type === 'ride_request') {
-                                document.querySelector('.update_notification_text').textContent = "{{translate('messages.You have new ride request, Check Please.')}}";
-                            }
-                        @endif
                             if (admin_role_id === '1') {
                             playAudio();
                             $('#popup-modal').appendTo("body").modal('show');
@@ -768,10 +702,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
                     @endif
 
         } else if (payload.data.type == 'safety_alert') {
-                    @if(addon_published_status('RideShare'))
-                        safetyAlertNotification(payload.data);
-                        playSafetyAlertAudio();
-                    @endif
 
         } else {
                     if (window.location.href.includes('message/list?conversation')) {
@@ -881,11 +811,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
                 } else if (new_order_type === 'trip') {
                     location.href = '{{url('/')}}/admin/rental/trip?module_id=' + new_module_id;
                 } else if (new_order_type === 'ride_request') {
-                    @if(addon_published_status('RideShare'))
-                        location.href = '{{url('/')}}/admin/ride-share/ride/list/all?module_id=' + {{ \App\Models\Module::where('module_type', 'ride-share')->first()?->id }};
-                    @else
-                        location.href = '{{url('/')}}/admin/order/list/all?module_id=' + new_module_id;
-                    @endif
         } else {
                     location.href = '{{url('/')}}/admin/order/list/all?module_id=' + new_module_id;
                 }
@@ -933,61 +858,6 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
                     }
                 })
             }
-
-
-            @if(addon_published_status('RideShare') && in_array($module_type, ['ride-share', 'settings']))
-                function fetchSafetyAlertIcon(condition = false) {
-                    let url = "{{ route('admin.ride-share.fleet-map.fleet-map-safety-alert-icon-in-map') }}";
-                    $.ajax({
-                        url: url,
-                        method: 'GET',
-                        success: function (response) {
-                            $('.safety-alert-icon-map').empty().html(response);
-                            if (condition) {
-                                if ($('#safetyAlertMapIcon').length) {
-                                    $('#safetyAlertMapIcon').addClass('d-none');
-                                }
-                                if ($('#newSafetyAlertMapIcon').length) {
-                                    $('#newSafetyAlertMapIcon').removeClass('d-none');
-                                }
-                            }
-
-                            $('.show-safety-alert-user-details').on('click', function () {
-                                localStorage.setItem('safetyAlertUserDetailsStatus', true);
-                            });
-                        }
-                    })
-                }
-
-                function getZoneMessage() {
-                    let url = "{{ route('admin.ride-share.fleet-map.fleet-map-zone-message') }}";
-                    $.ajax({
-                        url: url,
-                        method: 'GET',
-                        success: function (response) {
-                            $('.get-zone-message').empty().html(response);
-                            $('.zone-message-hide').on('click', function () {
-                                $('.zone-message').addClass('invisible');
-                                sessionStorage.setItem('showZoneMessage', 'false');
-                            });
-                        }
-                    })
-                }
-
-                $(document).ready(function () {
-                    let showSafetyAlertUserDetails = $('.show-safety-alert-user-details');
-                    showSafetyAlertUserDetails.on('click', function () {
-                        localStorage.setItem('safetyAlertUserDetailsStatus', true);
-                        localStorage.setItem('safetyAlertUserIdFromTrip', $(this).data('user-id'));
-                    });
-
-                    $('.safety-alert-header-icon').on('click', function () {
-                        localStorage.setItem('safetyAlertUserDetailsStatus', true);
-                        localStorage.setItem('safetyAlertUserId', $(this).data('user-id'));
-                    });
-                })
-
-            @endif
         </script>
 
 
@@ -1339,3 +1209,8 @@ if (in_array(config('module.current_module_type'), config('module.module_type'))
 </body>
 
 </html>
+
+
+
+
+

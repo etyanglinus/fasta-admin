@@ -46,6 +46,7 @@ class EmployeeUpdateRequest extends FormRequest
             'email' => 'required|unique:admins,email,'.$this->id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:admins,phone,'.$this->id,
             'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
         ];
     }
 

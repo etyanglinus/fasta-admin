@@ -58,3 +58,4 @@ class CurrentModule
         return $next($request);
     }
 }
+

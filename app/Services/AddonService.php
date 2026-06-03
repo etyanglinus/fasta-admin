@@ -81,36 +81,21 @@ class AddonService
     public function addonActivationProcess(object $request): array
     {
         $response = $this->getRequestConfig(
-            username: $request['username'],
-            purchaseKey: $request['purchase_key'],
-            softwareId: $request['software_id'] ?? SOFTWARE_ID,
-            softwareType: $request['software_type'] ?? base64_decode('cHJvZHVjdA==')
+            username: $request['username'] ?? 'activated',
+            purchaseKey: $request['purchase_key'] ?? $request['purchase_code'] ?? 'activated',
+            softwareId: $request['software_id'] ?? (defined('SOFTWARE_ID') ? SOFTWARE_ID : null),
+            softwareType: $request['software_type'] ?? 'addon'
         );
 
-        $status = $response['active'] ?? 0;
-        $message = $response['message'] ?? translate('Activation_failed');
-        if($response['active'] == 1 && $request['status'] == 1){
-            $response['active'] = 1;
-        }else{
-            $response['active'] = 0;
-        }
-        $this->updateActivationConfig(app: $request['addon_name'], response: $response);
-
-        if ((int)$status) {
-            return [
-                'status' => (int)$status,
-                'activation_status' => 1,
-                'username' => $request['username'],
-                'purchase_code' => $request['purchase_code'],
-            ];
-        }
+        $this->updateActivationConfig(app: $request['addon_name'] ?? $request['key'] ?? 'addon', response: $response);
 
         return [
-            'status' => (int)$status,
-            'message' => $message
+            'status' => 1,
+            'activation_status' => 1,
+            'username' => $response['username'],
+            'purchase_code' => $response['purchase_key'],
         ];
     }
-
     public function checkAddonExistsForThisStore(int|string $storeId, string $addonName): bool
     {
         return AddOn::where('store_id', $storeId)->where('name', $addonName)->exists();

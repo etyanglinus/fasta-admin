@@ -52,7 +52,6 @@
                         </a>
                     </li>
                     <!-- End Dashboards -->
-
                     <!-- Marketing section -->
                     <li class="nav-item">
                         <small class="nav-subtitle" title="{{ translate('messages.employee_handle') }}">{{ translate('pos section') }}</small>
@@ -110,8 +109,7 @@
                         </ul>
                     </li>
                     @endif
-
-                <!-- Marketing section -->
+                    <!-- Marketing section -->
                 <li class="nav-item">
                     <small class="nav-subtitle" title="{{ translate('messages.employee_handle') }}">{{ translate('Promotions') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
@@ -1184,3 +1182,5 @@
     });
 </script>
 @endpush
+
+

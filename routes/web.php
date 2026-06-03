@@ -18,7 +18,6 @@ use App\Http\Controllers\PaypalPaymentController;
 use App\Http\Controllers\StripePaymentController;
 use App\Http\Controllers\SslCommerzPaymentController;
 use Illuminate\Support\Facades\Http;
-use App\Http\Controllers\RiderRegistrationController;
 use Illuminate\Support\Facades\Artisan;
 
 /*
@@ -235,11 +234,6 @@ Route::group(['prefix' => 'vendor', 'as' => 'restaurant.'], function () {
     Route::get('final-step', 'VendorController@final_step')->name('final_step');
 });
 
-//Rider Registration
-Route::group(['prefix' => 'rider', 'as' => 'rider.'], function () {
-    Route::get('apply', [RiderRegistrationController::class, 'create'])->name('create');
-    Route::post('apply', [RiderRegistrationController::class, 'store'])->name('store');
-});
 
 //Deliveryman Registration
 Route::group(['prefix' => 'deliveryman', 'as' => 'deliveryman.'], function () {
@@ -262,3 +256,4 @@ Route::get('/image-proxy', function () {
         ->header('Content-Type', $response->header('Content-Type'))
         ->header('Access-Control-Allow-Origin', '*');
 });
+

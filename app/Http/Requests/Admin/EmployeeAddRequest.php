@@ -47,6 +47,7 @@ class EmployeeAddRequest extends FormRequest
             'email' => 'required|unique:admins',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:admins',
             'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
         ];
     }
 

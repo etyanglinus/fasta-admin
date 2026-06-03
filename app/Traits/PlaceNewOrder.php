@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Cart;
+use App\Models\GroupOrder;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Zone;
@@ -141,7 +142,11 @@ trait PlaceNewOrder
                 }
             }
 
-            $module_wise_delivery_charge = $zone->modules()->where('modules.id', getModuleId($request->header('moduleId')))->first();
+            $moduleId = getModuleId($request->header('moduleId'));
+            $module_wise_delivery_charge = $zone->modules()
+                ->where('modules.id', $moduleId)
+                ->when($store?->micro_zone_id, fn ($query) => $query->wherePivot('micro_zone_id', $store->micro_zone_id))
+                ->first() ?: $zone->modules()->where('modules.id', $moduleId)->wherePivot('micro_zone_id', null)->first();
 
             $deliveryChargeData = $this->getDeliveryCharge($request, $zone, $store, $module_wise_delivery_charge, $delivery_charge, getModuleId($request->header('moduleId')));
 
@@ -330,16 +335,7 @@ trait PlaceNewOrder
             if ($request->order_type !== 'parcel') {
                 if ($is_prescription === false) {
 
-                    $carts = Cart::where('user_id', $order->user_id)->where('is_guest', $order->is_guest)->where('module_id', getModuleId($request->header('moduleId')))
-                        ->when(isset($request->is_buy_now) && $request->is_buy_now == 1 && $request->cart_id, function ($query) use ($request) {
-                            return $query->where('id', $request->cart_id);
-                        })
-                        ->get()->map(function ($data) {
-                            $data->add_on_ids = json_decode($data->add_on_ids, true);
-                            $data->add_on_qtys = json_decode($data->add_on_qtys, true);
-                            $data->variation = json_decode($data->variation, true);
-                            return $data;
-                        });
+                    $carts = $this->getOrderCarts($request, $order);
 
                     if (isset($request->is_buy_now) && $request->is_buy_now == 1) {
                         $carts = json_decode($request['cart'], true);
@@ -585,6 +581,7 @@ trait PlaceNewOrder
                 foreach ($carts ?? [] as $cart) {
                     $cart?->delete();
                 }
+                $this->markGroupOrderPlaced($request);
             }
             if ($request->user) {
                 $customer = $request->user;
@@ -1115,6 +1112,47 @@ trait PlaceNewOrder
             info( 'place order notification error', [ $exception->getFile(), $exception->getLine(), $exception->getMessage()]);
         }
         return true;
+    }
+
+    private function getOrderCarts(Request $request, Order $order)
+    {
+        $query = Cart::where('module_id', getModuleId($request->header('moduleId')));
+
+        if ($request->group_order_code || $request->group_code) {
+            $groupOrder = GroupOrder::where('code', $request->group_order_code ?: $request->group_code)->first();
+            if (! $groupOrder || ! in_array($groupOrder->status, ['open', 'locked'], true) || $groupOrder->isExpired() || ! $groupOrder->isHost($request->user, $request->guest_id)) {
+                return collect();
+            }
+
+            $query->where('group_order_id', $groupOrder->id);
+        } else {
+            $query->where('user_id', $order->user_id)
+                ->where('is_guest', $order->is_guest)
+                ->whereNull('group_order_id')
+                ->when(isset($request->is_buy_now) && $request->is_buy_now == 1 && $request->cart_id, function ($query) use ($request) {
+                    return $query->where('id', $request->cart_id);
+                });
+        }
+
+        return $query->get()->map(function ($data) {
+            $data->add_on_ids = is_string($data->add_on_ids) ? json_decode($data->add_on_ids, true) : $data->add_on_ids;
+            $data->add_on_qtys = is_string($data->add_on_qtys) ? json_decode($data->add_on_qtys, true) : $data->add_on_qtys;
+            $data->variation = is_string($data->variation) ? json_decode($data->variation, true) : $data->variation;
+            return $data;
+        });
+    }
+
+    private function markGroupOrderPlaced(Request $request): void
+    {
+        $code = $request->group_order_code ?: $request->group_code;
+        if (! $code) {
+            return;
+        }
+
+        GroupOrder::where('code', $code)->update([
+            'status' => 'placed',
+            'placed_at' => now(),
+        ]);
     }
 
     private function makeOrderDetails($carts, $request, $order, $store)
@@ -1758,16 +1796,7 @@ trait PlaceNewOrder
                     $additionalCharges['tax_on_packaging_charge'] =  $extra_packaging_amount;
                 }
 
-                $carts = Cart::where('user_id', $order->user_id)->where('is_guest', $order->is_guest)->where('module_id', getModuleId($request->header('moduleId')))
-                    ->when(isset($request->is_buy_now) && $request->is_buy_now == 1 && $request->cart_id, function ($query) use ($request) {
-                        return $query->where('id', $request->cart_id);
-                    })
-                    ->get()->map(function ($data) {
-                        $data->add_on_ids = json_decode($data->add_on_ids, true);
-                        $data->add_on_qtys = json_decode($data->add_on_qtys, true);
-                        $data->variation = json_decode($data->variation, true);
-                        return $data;
-                    });
+                $carts = $this->getOrderCarts($request, $order);
 
                 if (isset($request->is_buy_now) && $request->is_buy_now == 1) {
                     $carts = json_decode($request['cart'], true);
@@ -2069,7 +2098,10 @@ trait PlaceNewOrder
                 return 0;
             }
             $extra_charges = 0;
-              $module_wise_delivery_charge = $store->zone->modules()->where('modules.id', $store->module_id)->first();
+              $module_wise_delivery_charge = $store->zone->modules()
+                  ->where('modules.id', $store->module_id)
+                  ->when($store?->micro_zone_id, fn ($query) => $query->wherePivot('micro_zone_id', $store->micro_zone_id))
+                  ->first() ?: $store->zone->modules()->where('modules.id', $store->module_id)->wherePivot('micro_zone_id', null)->first();
             if ($store->sub_self_delivery) {
                 $per_km_shipping_charge = $store?->per_km_shipping_charge ?? 0;
                 $minimum_shipping_charge = $store?->minimum_shipping_charge ?? 0;

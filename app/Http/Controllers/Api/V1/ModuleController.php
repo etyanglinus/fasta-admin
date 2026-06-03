@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\ZoneModuleException;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use App\Models\MicroZone;
 use App\Models\Zone;
 use Illuminate\Http\Request;
 

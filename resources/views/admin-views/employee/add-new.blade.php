@@ -1,4 +1,4 @@
-@extends('layouts.admin.app')
+﻿@extends('layouts.admin.app')
 @section('title', translate('Employee Add'))
 @push('css_or_js')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -74,6 +74,14 @@
                                             @foreach ($zones as $zone)
                                                 <option value="{{ $zone['id'] }}">{{ $zone['name'] }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div>
+                                        <label class="input-label">{{ translate('messages.micro_zone') }}</label>
+                                        <select name="micro_zone_id" id="micro_zone_id" class="form-control js-select2-custom">
+                                            <option value="">{{ translate('messages.all') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -257,4 +265,22 @@
             $('#role_id').val(null).trigger('change');
         })
     </script>
+
+<script>
+    $(document).on('change', '#zone_id', function () {
+        let zoneId = this.value;
+        let target = $('#micro_zone_id');
+        target.html('<option value="">{{ translate('messages.all') }}</option>');
+        if (!zoneId) {
+            target.trigger('change');
+            return;
+        }
+        $.get('{{ route('admin.business-settings.zone.micro-zones.by-zone') }}', {zone_id: zoneId}, function (data) {
+            data.forEach(function (microZone) {
+                target.append(`<option value="${microZone.id}">${microZone.name}</option>`);
+            });
+            target.trigger('change');
+        });
+    });
+</script>
 @endpush

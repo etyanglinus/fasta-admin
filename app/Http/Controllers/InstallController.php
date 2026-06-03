@@ -89,24 +89,13 @@ class InstallController extends Controller
     public function purchase_code(Request $request)
     {
         Helpers::setEnvironmentValue('SOFTWARE_ID', 'MzY3NzIxMTI=');
-        Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username']);
-        Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
+        Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username'] ?? 'activated');
+        Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key'] ?? 'activated');
 
-        $post = [
-            'name' => $request['name'],
-            'email' => $request['email'],
-            'username' => $request['username'],
-            'purchase_key' => $request['purchase_key'],
-            'domain' => preg_replace("#^[^:/.]*[:/]+#i", "", url('/')),
-        ];
-        // $response = $this->dmvf($post);
-
-        // return redirect($response.'?token='.bcrypt('step_3'));
-        Session::put(base64_decode('cHVyY2hhc2Vfa2V5'), $request[base64_decode('cHVyY2hhc2Vfa2V5')]);//pk
-        Session::put(base64_decode('dXNlcm5hbWU='), $request[base64_decode('dXNlcm5hbWU=')]);//un
+        Session::put(base64_decode('cHVyY2hhc2Vfa2V5'), $request[base64_decode('cHVyY2hhc2Vfa2V5')] ?? 'activated');
+        Session::put(base64_decode('dXNlcm5hbWU='), $request[base64_decode('dXNlcm5hbWU=')] ?? 'activated');
         return redirect('step3?token='.bcrypt('step_3'));
     }
-
     public function system_settings(Request $request)
     {
         if (!Hash::check('step_6', $request['token'])) {
@@ -200,7 +189,7 @@ class InstallController extends Controller
                     BUYER_USERNAME=' . session('username') . '
                     SOFTWARE_ID=MzY3NzIxMTI=
 
-                    SOFTWARE_VERSION=3.9
+                    SOFTWARE_VERSION=4.0
                     REACT_APP_KEY=45370351
                     ';
             $file = fopen(base_path('.env'), 'w');
@@ -262,3 +251,4 @@ class InstallController extends Controller
         }
     }
 }
+

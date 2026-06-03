@@ -15,7 +15,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             // return view('admin-views.test.surgeprice-setup.daily-schedule');
             // return view('admin-views.test.components');
 
-            //Version-3.9
+            //Version-4.0
             return view('admin-views.test.earning-reports.admin-earning-report');
 
             // version-3.4
@@ -66,7 +66,6 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         Route::get('maintenance-mode', 'SystemController@maintenance_mode')->name('maintenance-mode');
         Route::post('platform-maintenance', 'SystemController@platform_maintenance_update')->name('platform-maintenance.update');
         Route::get('landing-page', 'SystemController@landing_page')->name('landing-page');
-
         Route::group(['prefix' => 'parcel', 'as' => 'parcel.', 'middleware' => ['module:parcel']], function () {
             Route::get('category/status/{id}/{status}', 'ParcelCategoryController@status')->name('category.status');
             Route::resource('category', 'ParcelCategoryController');
@@ -457,7 +456,6 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
 
             Route::post('update-fcm-messages', 'BusinessSettingsController@update_fcm_messages')->name('update-fcm-messages');
             Route::post('update-fcm-messages-rental', 'BusinessSettingsController@update_fcm_messages_rental')->name('update-fcm-messages-rental');
-            Route::post('update-fcm-messages-ride-share', 'BusinessSettingsController@update_fcm_messages_ride_share')->name('update-fcm-messages-ride-share');
 
             Route::get('currency-add', 'BusinessSettingsController@currency_index')->name('currency-add');
             Route::post('currency-add', 'BusinessSettingsController@currency_store');
@@ -938,3 +936,6 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         });
     });
 });
+
+
+

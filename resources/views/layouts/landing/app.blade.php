@@ -1,16 +1,6 @@
 
 <!DOCTYPE html>
 <?php
-    if(addon_published_status('RideShare')){
-        $toggle_rider_registration = \App\CentralLogics\Helpers::get_data_settings(RIDE_SHARE_BUSINESS_SETTINGS, 'toggle_rider_registration')?->value ?? false;
-        if($toggle_rider_registration == 1){
-            $toggle_rider_registration = true;
-        }else{
-            $toggle_rider_registration = false;
-        }
-    } else {
-        $toggle_rider_registration = false;
-    }
     $landing_site_direction = session()->get('landing_site_direction');
     $country= \App\CentralLogics\Helpers::get_business_settings('country')  ;
     $countryCode= strtolower($country??'auto');
@@ -72,6 +62,7 @@
         <a href="{{route('about-us')}}" onclick="closeMobile()">{{ translate('messages.about_us') }}</a>
         <a href="{{route('blog.index')}}" onclick="closeMobile()">{{ translate('Blog') }}</a>
         <a href="{{route('careers.index')}}" onclick="closeMobile()">{{ translate('Careers') }}</a>
+
         <a href="{{route('press.index')}}" onclick="closeMobile()">{{ translate('Press & Media') }}</a>
         <a href="{{route('privacy-policy')}}" onclick="closeMobile()">{{ translate('messages.privacy_policy') }}</a>
         <a href="{{route('terms-and-conditions')}}" onclick="closeMobile()">{{ translate('messages.terms_and_condition') }}</a>
@@ -97,9 +88,6 @@
         @if (isset($toggle_dm_registration) && $toggle_dm_registration)
             <a href="{{ route('deliveryman.create') }}" onclick="closeMobile()">{{ translate('messages.deliveryman_registration') }}</a>
         @endif
-        @if (isset($toggle_rider_registration) && $toggle_rider_registration)
-            <a href="{{ route('rider.create') }}" onclick="closeMobile()">{{ translate('messages.rider_registration') }}</a>
-        @endif
         @if (isset($fixed_link) && isset($fixed_link['web_app_url_status']) && $fixed_link['web_app_url_status'] && !empty($fixed_link['web_app_url']))
             <a href="{{ $fixed_link['web_app_url'] }}" target="_blank" onclick="closeMobile()" class="mob-browse-web">{{ translate('Browse web') }}</a>
         @endif
@@ -116,6 +104,7 @@
                 <a href="{{route('about-us')}}" class="{{ Request::is('about-us') ? 'active-link' : '' }}">{{ translate('messages.about_us') }}</a>
                 <a href="{{route('blog.index')}}" class="{{ Request::is('blog*') ? 'active-link' : '' }}">{{ translate('Blog') }}</a>
                 <a href="{{route('careers.index')}}" class="{{ Request::is('careers*') ? 'active-link' : '' }}">{{ translate('Careers') }}</a>
+
                 <a href="{{route('press.index')}}" class="{{ Request::is('press*') ? 'active-link' : '' }}">{{ translate('Press & Media') }}</a>
                 <a href="{{route('privacy-policy')}}" class="{{ Request::is('privacy-policy') ? 'active-link' : '' }}">{{ translate('messages.privacy_policy') }}</a>
                 <a href="{{route('terms-and-conditions')}}" class="{{ Request::is('terms-and-conditions') ? 'active-link' : '' }}">{{ translate('messages.terms_and_condition') }}</a>
@@ -172,7 +161,7 @@
                 <a href="{{ $fixed_link['web_app_url'] }}" target="_blank" class="btn-browse-web">{{ translate('Browse web') }}</a>
                 @endif
 
-                @if (isset($toggle_dm_registration) || isset($toggle_store_registration) || isset($toggle_rider_registration))
+                @if (isset($toggle_dm_registration) || isset($toggle_store_registration))
                 <div class="join-wrap">
                     <button class="btn-join">{{ translate('Join us') }} <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 3.75L5 6.25L7.5 3.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
                     <div class="join-dd">
@@ -186,12 +175,6 @@
                         <a href="{{ route('deliveryman.create') }}" class="{{ Request::is('deliveryman*') ? 'active' : '' }}">
                             <span class="ji" style="background:rgba(0,190,101,.1);color:#00BE65;">&#x1F6F5;</span>
                             {{ translate('messages.deliveryman_registration') }}
-                        </a>
-                        @endif
-                        @if (isset($toggle_rider_registration) && $toggle_rider_registration)
-                        <a href="{{ route('rider.create') }}" class="{{ Request::is('rider*') ? 'active' : '' }}">
-                            <span class="ji" style="background:rgba(0,121,227,.1);color:#0079E3;">&#x1F697;</span>
-                            {{ translate('messages.rider_registration') }}
                         </a>
                         @endif
                     </div>
@@ -389,3 +372,7 @@
 
 </body>
 </html>
+
+
+
+

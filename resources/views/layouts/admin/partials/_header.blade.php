@@ -155,23 +155,7 @@
                                 <span class="btn-status btn-status-danger">{{ $message }}</span>
                             @endif
                         </a>
-                    </li>
-                    @if(addon_published_status('RideShare'))
-                        <li class="nav-item max-sm-m-0  mr-lg-3">
-                            @php($safetyAlert=\Modules\RideShare\Entities\TripManagement\RideSafetyAlert::where('status', 'pending'))
-                            @php($safety=$safetyAlert->count())
-                            @php($latestSafetyAlert=$safetyAlert->latest()->first())
-                            <a class="btn btn-icon rounded-circle nav-msg-icon p-0 h-100 w-100 d-flex justify-content-center @if($latestSafetyAlert) safety-alert-header-icon @endif"
-                            @if($latestSafetyAlert) data-user-id="{{ $latestSafetyAlert->sent_by }}" @endif
-                            href="{{route('admin.ride-share.safety-alerts',['module_id'=>\App\Models\Module::where('module_type','ride-share')->first()->id ?? 0])}}">
-                                <img src="{{asset('/public/assets/admin/img/new-img/shield-check.svg')}}" class="d-block" alt="public/img">
-                                @if($safety!=0)
-                                    <span class="btn-status btn-status-danger">{{ $safety }}</span>
-                                @endif
-                            </a>
-                        </li>
-                    @endif
-                    <li class="nav-item max-sm-m-0">
+                    </li><li class="nav-item max-sm-m-0">
                         <div class="hs-unfold">
                             <div>
                                 @php( $local = session()->has('local')?session('local'): null)
@@ -250,7 +234,7 @@
                                             <a href="javascript:"
 
                                                data-module-id="{{ $module->id }}"
-                                               data-url="{{$module->module_type == 'rental' && addon_published_status('Rental') ? route('admin.rental.dashboard') : route('admin.dashboard')}}"
+                                               data-url="{{ $module->module_type == 'rental' && addon_published_status('Rental') ? route('admin.rental.dashboard') : route('admin.dashboard') }}"
                                                data-filter="module_id"
 
                                                class="__nav-module-item set-module {{Config::get('module.current_module_id') == $module->id?'active':''}}">
@@ -365,6 +349,8 @@
         @endif
     </div>
 </div>
+
+
 
 
 

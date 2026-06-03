@@ -11,12 +11,6 @@ class StorefrontRedirectController extends Controller
 {
     public function home(Request $request)
     {
-        $store = Store::where('custom_domain', $this->normalizeHost($request->getHost()))->first();
-
-        if ($store) {
-            return $this->redirectToStore($store, 'custom_domain');
-        }
-
         return app(HomeController::class)->index();
     }
 
@@ -40,10 +34,5 @@ class StorefrontRedirectController extends Controller
         $url = data_get($settings, 'web_app_url') ?: config('app.url');
 
         return $url ?: url('/');
-    }
-
-    private function normalizeHost(string $host): string
-    {
-        return preg_replace('/^www\./i', '', strtolower($host));
     }
 }

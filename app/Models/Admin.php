@@ -49,6 +49,7 @@ class Admin extends Authenticatable
         'login_remember_token',
         'role_id',
         'zone_id',
+        'micro_zone_id',
         'is_logged_in',
     ];
 
@@ -59,6 +60,7 @@ class Admin extends Authenticatable
      */
     protected $casts = [
         'is_logged_in' => 'boolean',
+        'micro_zone_id' => 'integer',
     ];
     protected $appends = ['image_full_url'];
 
@@ -76,6 +78,11 @@ class Admin extends Authenticatable
     public function zones(): BelongsTo
     {
         return $this->belongsTo(Zone::class,'zone_id');
+    }
+
+    public function microZone(): BelongsTo
+    {
+        return $this->belongsTo(MicroZone::class, 'micro_zone_id');
     }
     public function getImageFullUrlAttribute(){
         $value = $this->image;

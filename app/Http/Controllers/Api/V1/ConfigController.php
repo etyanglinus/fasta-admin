@@ -133,25 +133,20 @@ class ConfigController extends Controller
         $module = Cache::rememberForever('module_config', function () {
             return Module::active()->count() == 1 ? Module::active()->first() : null;
         });
-        $languages = Helpers::get_business_settings('language');
-        $lang_array = [];
-        foreach ($languages as $language) {
-            array_push($lang_array, [
-                'key' => $language,
-                'value' => Helpers::get_language_name($language),
-            ]);
-        }
-        $system_languages = Helpers::get_business_settings('system_language');
-        $sys_lang_array = [];
-        foreach ($system_languages as $language) {
-            array_push($sys_lang_array, [
-                'key' => $language['code'],
-                'value' => Helpers::get_language_name($language['code']),
-                'direction' => $language['direction'],
-                'default' => $language['default'],
-            ]);
-        }
-        $social_login = [];
+        $lang_array = [
+            [
+                'key' => 'en',
+                'value' => Helpers::get_language_name('en'),
+            ],
+        ];
+        $sys_lang_array = [
+            [
+                'key' => 'en',
+                'value' => Helpers::get_language_name('en'),
+                'direction' => 'ltr',
+                'default' => true,
+            ],
+        ];        $social_login = [];
         foreach (Helpers::get_business_settings('social_login') as $social) {
             if (($social['login_medium'] ?? null) === 'facebook') {
                 continue;

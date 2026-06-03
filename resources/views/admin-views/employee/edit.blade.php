@@ -1,4 +1,4 @@
-@extends('layouts.admin.app')
+﻿@extends('layouts.admin.app')
 @section('title',translate('Employee Edit'))
 @push('css_or_js')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -82,6 +82,14 @@ active
                                         @foreach($roles as $role)
                                         <option value="{{$role->id}}" {{$role['id']==$employee['role_id']?'selected':''}}>{{$role->name}}</option>
                                         @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div>
+                                    <label class="input-label">{{ translate('messages.micro_zone') }}</label>
+                                    <select name="micro_zone_id" id="micro_zone_id" class="form-control js-select2-custom">
+                                        <option value="">{{ translate('messages.all') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -227,4 +235,23 @@ active
             $('#role_id').val("{{ $employee['role_id'] }}").trigger('change');
         })
     </script>
+
+<script>
+    function loadEmployeeMicroZones(zoneId, selectedId = null) {
+        let target = $('#micro_zone_id');
+        target.html('<option value="">{{ translate('messages.all') }}</option>');
+        if (!zoneId) {
+            target.trigger('change');
+            return;
+        }
+        $.get('{{ route('admin.business-settings.zone.micro-zones.by-zone') }}', {zone_id: zoneId}, function (data) {
+            data.forEach(function (microZone) {
+                target.append(`<option value="${microZone.id}" ${String(selectedId) === String(microZone.id) ? 'selected' : ''}>${microZone.name}</option>`);
+            });
+            target.trigger('change');
+        });
+    }
+    $(document).on('change', '#zone_id', function () { loadEmployeeMicroZones(this.value); });
+    $(document).ready(function () { loadEmployeeMicroZones($('#zone_id').val(), '{{ $employee->micro_zone_id }}'); });
+</script>
 @endpush

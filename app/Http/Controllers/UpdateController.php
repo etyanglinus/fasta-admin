@@ -41,10 +41,10 @@ class UpdateController extends Controller
             $filesystem->cleanDirectory('database/migrations');
         }
 
-        Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username']);
-        Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key']);
+        Helpers::setEnvironmentValue('BUYER_USERNAME', $request['username'] ?? 'activated');
+        Helpers::setEnvironmentValue('PURCHASE_CODE', $request['purchase_key'] ?? 'activated');
         Helpers::setEnvironmentValue('APP_MODE', 'live');
-        Helpers::setEnvironmentValue('SOFTWARE_VERSION', '3.9');
+        Helpers::setEnvironmentValue('SOFTWARE_VERSION', '4.0');
         Helpers::setEnvironmentValue('REACT_APP_KEY', '45370351');
         Helpers::setEnvironmentValue('APP_NAME', '"Fasta Deliveries ' . time() . '"');
 
@@ -555,3 +555,4 @@ class UpdateController extends Controller
 
 
 }
+

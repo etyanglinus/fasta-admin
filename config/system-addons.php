@@ -1,56 +1,56 @@
 <?php return array (
   'admin_panel' => 
   array (
-    'active' => '0',
-    'username' => '1',
-    'purchase_key' => '1',
+    'active' => 1,
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => 'MzY3NzIxMTI=',
     'domain' => '',
     'software_type' => 'product',
   ),
   'vendor_panel' => 
   array (
-    'active' => '0',
-    'username' => '',
-    'purchase_key' => '',
+    'active' => 1,
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => '',
     'domain' => '',
     'software_type' => 'addon',
   ),
   'user_app' => 
   array (
-    'active' => '0',
-    'username' => '',
-    'purchase_key' => '',
+    'active' => 1,
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => '',
     'domain' => '',
     'software_type' => 'addon',
   ),
   'vendor_app' => 
   array (
-    'active' => 0,
-    'username' => '1234',
-    'purchase_key' => '1234',
+    'active' => 1,
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => 'MzY3NzIxNzM=',
-    'domain' => 'localhost/fasta/fasta-admin',
+    'domain' => '',
     'software_type' => 'addon',
   ),
   'deliveryman_app' => 
   array (
     'active' => 1,
-    'username' => '1234',
-    'purchase_key' => '1234',
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => 'MzY3NzIxNDg=',
-    'domain' => 'localhost/fasta/fasta-admin',
+    'domain' => '',
     'software_type' => 'addon',
   ),
   'react_web' => 
   array (
-    'active' => 0,
-    'username' => '1234',
-    'purchase_key' => '1234',
+    'active' => 1,
+    'username' => 'activated',
+    'purchase_key' => 'activated',
     'software_id' => 'NDUzNzAzNTE=',
-    'domain' => 'localhost/fasta/fasta-admin',
+    'domain' => '',
     'software_type' => 'addon',
   ),
 );

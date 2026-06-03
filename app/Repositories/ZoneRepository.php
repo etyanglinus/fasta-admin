@@ -105,13 +105,26 @@ class ZoneRepository implements ZoneRepositoryInterface
         return $this->zone->with($relations)->latest()->first();
     }
 
-    public function zoneModuleSetupUpdate(string $id, array $data, array $moduleData): bool|string|object
+    public function zoneModuleSetupUpdate(string $id, array $data, array $moduleData, int|string|null $microZoneId = null): bool|string|object
     {
         $zone = $this->zone->find($id);
         foreach ($data as $key => $column) {
             $zone[$key] = $column;
         }
-        $zone->modules()->sync($moduleData);
+
+        if ($microZoneId) {
+            \App\Models\ModuleZone::where('zone_id', $id)->where('micro_zone_id', $microZoneId)->delete();
+            foreach ($moduleData as $moduleId => $pivotData) {
+                \App\Models\ModuleZone::create(array_merge($pivotData, [
+                    'zone_id' => $id,
+                    'micro_zone_id' => $microZoneId,
+                    'module_id' => $moduleId,
+                ]));
+            }
+        } else {
+            $zone->modules()->sync($moduleData);
+        }
+
         $zone->save();
         return $zone;
     }

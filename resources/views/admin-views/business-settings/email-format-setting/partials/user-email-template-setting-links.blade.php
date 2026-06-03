@@ -60,6 +60,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/policy-update') ? 'active' : '' }}"
+                href="{{ route('admin.business-settings.email-setup', ['user','policy-update']) }}">
+                    {{translate('Policy_Update')}}
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ Request::is('admin/business-settings/email-setup/user/offline-payment-approve') ? 'active' : '' }}"
                 href="{{ route('admin.business-settings.email-setup', ['user','offline-payment-approve']) }}">
                     {{translate('Offline_Payment_Approve')}}

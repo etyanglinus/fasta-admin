@@ -11,10 +11,13 @@ class ModuleZone extends Pivot
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     protected $casts = [
         'id'=>'integer',
         'module_id'=>'integer',
         'zone_id'=>'integer',
+        'micro_zone_id'=>'integer',
         'per_km_shipping_charge'=>'float',
         'minimum_shipping_charge'=>'float',
         'maximum_shipping_charge'=>'float',
@@ -22,3 +25,4 @@ class ModuleZone extends Pivot
         'fixed_shipping_charge'=>'float',
     ];
 }
+

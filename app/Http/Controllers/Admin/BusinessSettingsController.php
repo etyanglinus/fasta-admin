@@ -31,6 +31,8 @@ use App\Models\Store;
 use App\Models\StoreSubscription;
 use App\Models\TempProduct;
 use App\Models\Translation;
+use App\Models\User;
+use App\Mail\PolicyUpdateMail;
 use App\Traits\Processor;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
@@ -1286,7 +1288,14 @@ class BusinessSettingsController extends Controller
 
     public function terms_and_conditions_update(Request $request)
     {
+        $defaultIndex = array_search('default', $request->lang);
+        $old = DataSetting::withoutGlobalScope('translate')->where('type', 'admin_landing_page')->where('key', 'terms_and_conditions')->first()?->value;
+        $newValue = $defaultIndex !== false ? ($request->data[$defaultIndex] ?? null) : null;
+
         $this->update_data($request, 'terms_and_conditions');
+        if ($old !== $newValue) {
+            $this->notifyUsersOfPolicyUpdate('Terms and Conditions', route('terms-and-conditions'));
+        }
         Toastr::success(translate('messages.terms_and_condition_updated'));
 
         return back();
@@ -1301,12 +1310,36 @@ class BusinessSettingsController extends Controller
 
     public function privacy_policy_update(Request $request)
     {
+        $defaultIndex = array_search('default', $request->lang);
+        $old = DataSetting::withoutGlobalScope('translate')->where('type', 'admin_landing_page')->where('key', 'privacy_policy')->first()?->value;
+        $newValue = $defaultIndex !== false ? ($request->data[$defaultIndex] ?? null) : null;
+
         $this->update_data($request, 'privacy_policy');
+        if ($old !== $newValue) {
+            $this->notifyUsersOfPolicyUpdate('Privacy Policy', route('privacy-policy'));
+        }
         Toastr::success(translate('messages.privacy_policy_updated'));
 
         return back();
     }
 
+
+    private function notifyUsersOfPolicyUpdate(string $policyName, string $url): void
+    {
+        if (! config('mail.status') || Helpers::get_mail_status('policy_update_mail_status_user') != '1') {
+            return;
+        }
+
+        User::whereNotNull('email')->where('email', '!=', '')->select('id', 'email')->chunkById(100, function ($users) use ($policyName, $url) {
+            foreach ($users as $user) {
+                try {
+                    Mail::to($user->email)->send(new PolicyUpdateMail($policyName, $url));
+                } catch (\Throwable $exception) {
+                    info('Policy update mail failed for user '.$user->id.': '.$exception->getMessage());
+                }
+            }
+        });
+    }
     public function refund_policy()
     {
         $refund_policy = DataSetting::withoutGlobalScope('translate')->where('type', 'admin_landing_page')->where('key', 'refund_policy')->first();
@@ -6676,6 +6709,7 @@ class BusinessSettingsController extends Controller
             'approve' => 'approve',
             'deny' => 'deny',
             'registration' => 'registration',
+            'policy-update' => 'policy_update',
         ];
 
         $email_type = $email_types[$tab] ?? null;
@@ -6859,46 +6893,19 @@ class BusinessSettingsController extends Controller
 
     public function react_update(Request $request)
     {
-        $request->validate([
-            'react_license_code' => 'required',
-            'react_domain' => 'required',
-        ], [
-            'react_license_code.required' => translate('messages.license_code_is_required'),
-            'react_domain.required' => translate('messages.doamain_is_required'),
+        Helpers::businessUpdateOrInsert(['key' => 'react_setup'], [
+            'value' => json_encode([
+                'status' => 1,
+                'react_license_code' => $request['react_license_code'] ?? 'activated',
+                'react_domain' => $request['react_domain'] ?? str_replace(["http://", "https://"], '', url('/')),
+                'react_platform' => 'custom',
+            ]),
         ]);
-        if (Helpers::activation_submit($request['react_license_code'])) {
-            Helpers::businessUpdateOrInsert(['key' => 'react_setup'], [
-                'value' => json_encode([
-                    'status' => 1,
-                    'react_license_code' => $request['react_license_code'],
-                    'react_domain' => $request['react_domain'],
-                    'react_platform' => 'codecanyon',
-                ]),
-            ]);
 
-            Toastr::success(translate('messages.react_data_updated'));
+        Toastr::success(translate('messages.react_data_updated'));
 
-            return back();
-        } elseif (Helpers::react_activation_check($request->react_domain, $request->react_license_code)) {
-
-            Helpers::businessUpdateOrInsert(['key' => 'react_setup'], [
-                'value' => json_encode([
-                    'status' => 1,
-                    'react_license_code' => $request['react_license_code'],
-                    'react_domain' => $request['react_domain'],
-                    'react_platform' => 'iss',
-                ]),
-            ]);
-
-            Toastr::success(translate('messages.react_data_updated'));
-
-            return back();
-        }
-        Toastr::error(translate('messages.Invalid_license_code_or_unregistered_domain'));
-
-        return back()->withInput(['invalid-data' => true]);
+        return back();
     }
-
     public function landing_page_settings_update(Request $request)
     {
         if ($request->choose_admin_landing === 'default') {

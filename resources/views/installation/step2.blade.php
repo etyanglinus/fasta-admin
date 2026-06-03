@@ -36,25 +36,25 @@
                             <div class="col-md-6">
                                 <div class="from-group">
                                     <label for="username" class="d-flex align-items-center gap-2 mb-2">
-                                        <span class="fw-medium">Username</span>
+                                        <span class="fw-medium">Username (optional)</span>
                                         <span class="cursor-pointer" data-bs-toggle="tooltip"
                                               data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                               data-bs-html="true"
-                                              data-bs-title="The username of your codecanyon account">
+                                              data-bs-title="Optional local customization username">
                                                     <img
                                                         src="{{asset('public/assets/installation')}}/assets/img/svg-icons/info2.svg"
                                                         class="svg" alt="">
                                                 </span>
                                     </label>
                                     <input type="text" id="username" class="form-control" name="username"
-                                           placeholder="Ex: john" required>
+                                           placeholder="activated" value="activated">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="from-group">
-                                    <label for="purchase_key" class="mb-2">License Key</label>
+                                    <label for="purchase_key" class="mb-2">License Key (optional)</label>
                                     <input type="text" id="purchase_key" class="form-control" name="purchase_key"
-                                           placeholder="Ex: 19xxxxxx-ca5c-49c2-83f6-696a738b0000" required>
+                                           placeholder="activated" value="activated">
                                 </div>
                             </div>
                         </div>
