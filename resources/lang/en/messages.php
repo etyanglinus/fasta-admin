@@ -11880,4 +11880,5 @@ Smartly or Earn. ',
   'Assign modules' => 'Assign modules',
   'Surge prices' => 'Surge prices',
   'No modules enabled' => 'No modules enabled',
+  'The coordinates field is required.' => 'The coordinates field is required.',
 );
