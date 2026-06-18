@@ -52,7 +52,7 @@ class ZoneController extends BaseController
         $zones = $this->zoneRepo->getListWhere(
             searchValue: $request['search'],
             dataLimit: config('default_pagination'),
-            relations: ['stores.vendor', 'modules', 'deliverymen'],
+            relations: ['stores.vendor', 'modules', 'deliverymen', 'paymentGateways'],
         );
         $language = getWebConfig('language');
 
@@ -72,7 +72,7 @@ class ZoneController extends BaseController
         $this->translationRepo->addByModel(request: $request, model: $zone, modelPath: 'App\Models\Zone', attribute: 'display_name');
 
         $zones = $this->zoneRepo->getListWhere(
-            relations: ['stores.vendor', 'deliverymen'],
+            relations: ['stores.vendor', 'deliverymen', 'paymentGateways'],
             dataLimit: config('default_pagination'),
         );
 
@@ -260,7 +260,12 @@ class ZoneController extends BaseController
         $filteredModuleData = collect($request->module_data)
             ->only($request->module_id)
             ->toArray();
-        $this->zoneRepo->zoneModuleSetupUpdate(id: $id, data: $paymentData, moduleData: $filteredModuleData);
+        $this->zoneRepo->zoneModuleSetupUpdate(
+            id: $id,
+            data: $paymentData,
+            moduleData: $filteredModuleData,
+            microZoneId: $request->micro_zone_id
+        );
         $this->zoneRepo->update(id: $id, data: ['currency_code' => $request->currency_code]);
         ZonePaymentGateway::where('zone_id', $id)->delete();
         foreach ($request->payment_gateways ?? [] as $gateway) {
@@ -279,7 +284,7 @@ class ZoneController extends BaseController
     {
         session()->put('zone-instruction', 1);
         $zones = $this->zoneRepo->getWithCountLatest(
-            relations: ['stores', 'deliverymen'],
+            relations: ['stores', 'deliverymen', 'modules', 'paymentGateways'],
             dataLimit: config('default_pagination')
         );
         $language = getWebConfig('language');
@@ -466,4 +471,5 @@ class ZoneController extends BaseController
         return back();
     }
 }
+
 

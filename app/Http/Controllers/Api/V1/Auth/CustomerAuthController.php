@@ -426,6 +426,7 @@ class CustomerAuthController extends Controller
             'email' => 'unique:users',
             'phone' => 'required|unique:users',
             'password' => ['required', Password::min(8)],
+            'date_of_birth' => 'nullable|date|before:today',
 
         ], [
             'name.required' => translate('The name field is required.'),
@@ -482,6 +483,8 @@ class CustomerAuthController extends Controller
             'f_name' => $firstName,
             'l_name' => $lastName,
             'email' => $request->email,
+            'date_of_birth' => $request->date_of_birth,
+            'date_of_birth_updated_at' => $request->date_of_birth ? now() : null,
             'phone' => $request->phone,
             'ref_by' =>   $ref_by,
             'password' => bcrypt($request->password)

@@ -16,6 +16,7 @@ class SurgePrice extends Model
         'weekly_days' => 'array',
         'module_ids' => 'array',
         'customer_note_status' => 'integer',
+        'micro_zone_id' => 'integer',
     ];
 
     public function translations()
@@ -26,6 +27,11 @@ class SurgePrice extends Model
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function microZone()
+    {
+        return $this->belongsTo(MicroZone::class);
     }
 
     public function details()
@@ -70,3 +76,4 @@ class SurgePrice extends Model
         });
     }
 }
+

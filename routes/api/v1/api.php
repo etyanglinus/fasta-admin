@@ -434,6 +434,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
                 Route::put('offline-payment', 'OrderController@offline_payment');
                 Route::put('offline-payment-update', 'OrderController@update_offline_payment_info');
                 Route::post('get-surge-price', 'OrderController@getSurgePriceAmount');
+                Route::post('reorder', 'OrderController@reorder');
                 Route::post('parcel-return', 'OrderController@parcelReturn');
                 Route::post('wallet-payment', 'OrderController@walletPayment');
                 Route::get('payment-failed', 'CustomerController@orderPaymentFailed');

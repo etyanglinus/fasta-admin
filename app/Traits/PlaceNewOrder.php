@@ -984,7 +984,7 @@ trait PlaceNewOrder
     {
         $increased = 0;
         $schedule_at = $request->schedule_at ? \Carbon\Carbon::parse($request->schedule_at) : now();
-        $surge = $this->getSurgePriceValue($zone->id, $moduleId, $schedule_at);
+        $surge = $this->getSurgePriceValue($zone->id, $moduleId, $schedule_at, $store?->micro_zone_id);
         if ($surge['price'] > 0) {
             $increased = $surge['price'];
         }
@@ -2010,14 +2010,14 @@ trait PlaceNewOrder
         return response()->json($data, 200);
     }
 
-    public function getSurgePrice($zoneId, $moduleId, $datetime) {
+    public function getSurgePrice($zoneId, $moduleId, $datetime, $microZoneId = null) {
 
-        $data = $this->getSurgePriceValue($zoneId, $moduleId, $datetime);
+        $data = $this->getSurgePriceValue($zoneId, $moduleId, $datetime, $microZoneId);
 
         return response()->json($data, 200);
     }
 
-    public function getSurgePriceValue($zoneId, $moduleId, $datetime)
+    public function getSurgePriceValue($zoneId, $moduleId, $datetime, $microZoneId = null)
     {
         $carbon = Carbon::parse($datetime);
         $dateStr = $carbon->format('Y-m-d');
@@ -2027,6 +2027,11 @@ trait PlaceNewOrder
         // Check exact date in surge_price_dates table
         $surgeDate = DB::table('surge_price_dates')
             ->where('zone_id', $zoneId)
+            ->when($microZoneId, function ($query) use ($microZoneId) {
+                $query->where(function ($query) use ($microZoneId) {
+                    $query->where('micro_zone_id', $microZoneId)->orWhereNull('micro_zone_id');
+                });
+            }, fn ($query) => $query->whereNull('micro_zone_id'))
             ->where('module_id', $moduleId)
             ->where('applicable_date', $dateStr)
             ->where(function ($query) use ($timeStr) {
@@ -2036,6 +2041,7 @@ trait PlaceNewOrder
                             ->where('end_time', '>=', $timeStr);
                     });
             })
+            ->orderByRaw('CASE WHEN micro_zone_id IS NULL THEN 1 ELSE 0 END')
             ->first();
 
         if ($surgeDate) {
@@ -2058,6 +2064,11 @@ trait PlaceNewOrder
         $permanentSurge = SurgePrice::
             where('status', 1)
             ->where('zone_id', $zoneId)
+            ->when($microZoneId, function ($query) use ($microZoneId) {
+                $query->where(function ($query) use ($microZoneId) {
+                    $query->where('micro_zone_id', $microZoneId)->orWhereNull('micro_zone_id');
+                });
+            }, fn ($query) => $query->whereNull('micro_zone_id'))
             ->whereJsonContains('module_ids', $moduleId)
             ->where('duration_type', 'weekly')
             ->where('is_permanent', 1)
@@ -2069,6 +2080,7 @@ trait PlaceNewOrder
                             ->where('end_time', '>=', $timeStr);
                     });
             })
+            ->orderByRaw('CASE WHEN micro_zone_id IS NULL THEN 1 ELSE 0 END')
             ->first();
 
         if ($permanentSurge) {

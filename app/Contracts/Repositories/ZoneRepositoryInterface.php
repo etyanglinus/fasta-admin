@@ -45,7 +45,7 @@ interface ZoneRepositoryInterface extends RepositoryInterface
      * @param array $moduleData
      * @return bool|string|object
      */
-    public function zoneModuleSetupUpdate(string $id, array $data, array $moduleData): bool|string|object;
+    public function zoneModuleSetupUpdate(string $id, array $data, array $moduleData, int|string|null $microZoneId = null): bool|string|object;
 
     /**
      * @param array $relations
@@ -61,3 +61,4 @@ interface ZoneRepositoryInterface extends RepositoryInterface
      */
     public function getActiveListExcept(array $params): Collection;
 }
+

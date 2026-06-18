@@ -16,6 +16,7 @@
       <form action="{{ route('admin.business-settings.zone.surge-price.store') }}" method="post" id="surge_form">
         @csrf
         <input autocomplete="off" type="hidden" name="zone_id" value="{{ $zone->id }}">
+        <input autocomplete="off" type="hidden" name="micro_zone_id" value="{{ $selectedMicroZone?->id }}">
         <div class="card mb-20">
             <div class="card-header">
                 <h4 class="mb-0">{{translate('Basic Setup')}}</h4>
@@ -89,8 +90,11 @@
                         <div>
                             <label class="mb-2 d-block title-clr fw-normal">{{ translate('Module') }} <span class="text-danger">*</span></label>
                             @php($modules = \App\Models\Module::
-                                    whereHas('zones', function ($query) use ($zone) {
+                                    whereHas('zones', function ($query) use ($zone, $selectedMicroZone) {
                                 $query->where('zone_id', $zone->id);
+                                if ($selectedMicroZone) {
+                                    $query->where('module_zone.micro_zone_id', $selectedMicroZone->id);
+                                }
                             })
                             ->whereNotIn('module_type',['rental','parcel'])->get())
                             <select name="module_ids[]" id="module_selected" class="form-control h--45px js-select2-custom" multiple="multiple" placeholder="Module Select" data-placeholder="Module">
@@ -113,7 +117,7 @@
                                     <select name="price_type" id="price_type" class="custom-select ltr border-0">
                                         <option value="percent" selected>%</option>
                                         <option value="amount">
-                                            {{ \App\CentralLogics\Helpers::currency_symbol() }}
+                                            {{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }}
                                         </option>
                                     </select>
                                 </div>

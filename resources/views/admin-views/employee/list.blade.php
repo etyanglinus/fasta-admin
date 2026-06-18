@@ -93,6 +93,8 @@ active
                                 <th class="border-0">{{translate('messages.name')}}</th>
                                 <th class="border-0">{{translate('messages.email')}}</th>
                                 <th class="border-0">{{translate('messages.phone')}}</th>
+                                <th class="border-0">{{translate('messages.country')}}</th>
+                                <th class="border-0">{{translate('messages.city')}}</th>
                                 <th class="border-0">{{translate('messages.Role')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.action')}}</th>
                             </tr>
@@ -106,6 +108,8 @@ active
                                       {{$employee['email']}}
                                     </td>
                                     <td>{{$employee['phone']}}</td>
+                                    <td>{{ $employee->zones?->name ?? translate('messages.all') }}</td>
+                                    <td>{{ $employee->microZone?->name ?? translate('messages.all') }}</td>
                                     <td>{{$employee->role?$employee->role['name']:translate('messages.role_deleted')}}</td>
                                     <td>
                                         @if (auth('admin')->id()  != $employee['id'])
@@ -155,3 +159,5 @@ active
 @push('script_2')
 
 @endpush
+
+

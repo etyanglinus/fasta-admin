@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\CentralLogics\Helpers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\MicroZone;
 use App\Models\SurgePrice;
 use App\Models\Zone;
 use Brian2694\Toastr\Facades\Toastr;
@@ -20,8 +21,11 @@ class SurgePriceController extends Controller
     public function index(Request $request, $zone_id)
     {
         $zone = Zone::findOrFail($zone_id);
+        $selectedMicroZone = $this->getMicroZoneForCountry($request->micro_zone_id, $zone->id);
         $key = explode(' ', $request['search']);
-        $surges = SurgePrice::where('zone_id', $zone_id)->when(isset($key), function($query) use($key) {
+        $surges = SurgePrice::where('zone_id', $zone_id)
+        ->when($selectedMicroZone, fn ($query) => $query->where('micro_zone_id', $selectedMicroZone->id))
+        ->when(isset($key), function($query) use($key) {
             $query->where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->orWhere('surge_price_name', 'like', "%{$value}%");
@@ -29,14 +33,15 @@ class SurgePriceController extends Controller
             });
         })
         ->paginate(config('default_pagination'));
-        return view('admin-views.zone.surge-setup', compact('zone', 'surges'));
+        return view('admin-views.zone.surge-setup', compact('zone', 'surges', 'selectedMicroZone'));
     }
 
-    public function create($zone_id)
+    public function create(Request $request, $zone_id)
     {
         $zone = Zone::findOrFail($zone_id);
+        $selectedMicroZone = $this->getMicroZoneForCountry($request->micro_zone_id, $zone->id);
         $language = getWebConfig('language');
-        return view('admin-views.zone.surge-price.index', compact('zone', 'language'));
+        return view('admin-views.zone.surge-price.index', compact('zone', 'language', 'selectedMicroZone'));
     }
 
     public function store(Request $request)
@@ -96,6 +101,7 @@ class SurgePriceController extends Controller
             $surge->customer_note_status = $request->has('customer_note_status') ? 1 : 0;
             $surge->module_ids = $request->module_ids;
             $surge->zone_id = $request->zone_id;
+            $surge->micro_zone_id = $request->micro_zone_id;
             $surge->duration_type = $request->duration_type;
             $surge->price = $request->price;
             $surge->price_type = $request->price_type;
@@ -172,9 +178,10 @@ class SurgePriceController extends Controller
 
     public function edit($id)
     {
-        $surge = SurgePrice::withOutGlobalScopes(['translate'])->findOrFail($id);
+        $surge = SurgePrice::withOutGlobalScopes(['translate'])->with('microZone')->findOrFail($id);
+        $selectedMicroZone = $surge->microZone;
         $language = getWebConfig('language');
-        return view('admin-views.zone.surge-price.edit', compact('surge', 'language'));
+        return view('admin-views.zone.surge-price.edit', compact('surge', 'language', 'selectedMicroZone'));
     }
 
     public function update(Request $request, $id)
@@ -233,6 +240,7 @@ class SurgePriceController extends Controller
             $surge->customer_note = $request->customer_note[array_search('default', $request->lang)] ?? null;
             $surge->customer_note_status = $request->has('customer_note_status') ? 1 : 0;
             $surge->module_ids = $request->module_ids;
+            $surge->micro_zone_id = $request->micro_zone_id;
             $surge->duration_type = $request->duration_type;
             $surge->price = $request->price;
             $surge->price_type = $request->price_type;
@@ -337,12 +345,13 @@ class SurgePriceController extends Controller
                     $dayName = $date->format('l');
 
                     // Check if this date falls under a permanent weekly surge
-                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $moduleId, $dayName, $startTime, $endTime)) {
+                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $surge->micro_zone_id, $moduleId, $dayName, $startTime, $endTime)) {
                         abort(409, "Time conflict: Permanent weekly surge already exists on {$dayName} for module ID {$moduleId}");
                     }
 
                     $conflict = DB::table('surge_price_dates')
                         ->where('zone_id', $surge->zone_id)
+                        ->where('micro_zone_id', $surge->micro_zone_id)
                         ->where('module_id', $moduleId)
                         ->where('applicable_date', $dateStr)
                         ->where(function ($query) use ($startTime, $endTime) {
@@ -361,6 +370,7 @@ class SurgePriceController extends Controller
                     DB::table('surge_price_dates')->insert([
                         'surge_price_id'  => $surge->id,
                         'zone_id'         => $surge->zone_id,
+                        'micro_zone_id'   => $surge->micro_zone_id,
                         'module_id'       => $moduleId,
                         'applicable_date' => $dateStr,
                         'start_time'      => $startTime,
@@ -383,6 +393,7 @@ class SurgePriceController extends Controller
                     foreach ($weekdays as $weekday) {
                         $conflict = DB::table('surge_prices')
                             ->where('zone_id', $surge->zone_id)
+                            ->where('micro_zone_id', $surge->micro_zone_id)
                             ->whereJsonContains('module_ids', $moduleId)
                             ->whereJsonContains('weekly_days', $weekday)
                             ->where(function ($query) use ($startTime, $endTime) {
@@ -415,6 +426,7 @@ class SurgePriceController extends Controller
 
                         $conflict = DB::table('surge_price_dates')
                             ->where('zone_id', $surge->zone_id)
+                            ->where('micro_zone_id', $surge->micro_zone_id)
                             ->where('module_id', $moduleId)
                             ->where('applicable_date', $dateStr)
                             ->where(function ($query) use ($startTime, $endTime) {
@@ -451,12 +463,13 @@ class SurgePriceController extends Controller
                     if (!in_array($dayName, $weekdays)) continue;
 
                     // Conflict with permanent weekly surge
-                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $moduleId, $dayName, $startTime, $endTime)) {
+                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $surge->micro_zone_id, $moduleId, $dayName, $startTime, $endTime)) {
                         abort(409, "Time conflict: Permanent weekly surge already exists on {$dayName} for module ID {$moduleId}");
                     }
 
                     $conflict = DB::table('surge_price_dates')
                         ->where('zone_id', $surge->zone_id)
+                        ->where('micro_zone_id', $surge->micro_zone_id)
                         ->where('module_id', $moduleId)
                         ->where('applicable_date', $dateStr)
                         ->where(function ($query) use ($startTime, $endTime) {
@@ -475,6 +488,7 @@ class SurgePriceController extends Controller
                     DB::table('surge_price_dates')->insert([
                         'surge_price_id'  => $surge->id,
                         'zone_id'         => $surge->zone_id,
+                        'micro_zone_id'   => $surge->micro_zone_id,
                         'module_id'       => $moduleId,
                         'applicable_date' => $dateStr,
                         'start_time'      => $startTime,
@@ -498,12 +512,13 @@ class SurgePriceController extends Controller
                     $endTime   = date('H:i:s', strtotime($endTime));
 
                     // Check against permanent weekly
-                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $moduleId, $dayName, $startTime, $endTime)) {
+                    if ($this->isBlockedByPermanentWeekly($surge->zone_id, $surge->micro_zone_id, $moduleId, $dayName, $startTime, $endTime)) {
                         abort(409, "Time conflict: Permanent weekly surge already exists on {$dayName} for module ID {$moduleId}");
                     }
 
                     $conflict = DB::table('surge_price_dates')
                         ->where('zone_id', $surge->zone_id)
+                        ->where('micro_zone_id', $surge->micro_zone_id)
                         ->where('module_id', $moduleId)
                         ->where('applicable_date', $dateStr)
                         ->where(function ($query) use ($startTime, $endTime) {
@@ -522,6 +537,7 @@ class SurgePriceController extends Controller
                     DB::table('surge_price_dates')->insert([
                         'surge_price_id'  => $surge->id,
                         'zone_id'         => $surge->zone_id,
+                        'micro_zone_id'   => $surge->micro_zone_id,
                         'module_id'       => $moduleId,
                         'applicable_date' => $dateStr,
                         'start_time'      => $startTime,
@@ -534,10 +550,11 @@ class SurgePriceController extends Controller
         }
     }
 
-    private function isBlockedByPermanentWeekly($zoneId, $moduleId, $weekday, $startTime, $endTime)
+    private function isBlockedByPermanentWeekly($zoneId, $microZoneId, $moduleId, $weekday, $startTime, $endTime)
     {
         return DB::table('surge_prices')
             ->where('zone_id', $zoneId)
+            ->where('micro_zone_id', $microZoneId)
             ->whereJsonContains('module_ids', $moduleId)
             ->where('duration_type', 'weekly')
             ->where('is_permanent', 1)
@@ -553,6 +570,15 @@ class SurgePriceController extends Controller
             ->exists();
     }
 
+
+    private function getMicroZoneForCountry($microZoneId, $zoneId): ?MicroZone
+    {
+        if (! $microZoneId) {
+            return null;
+        }
+
+        return MicroZone::where('zone_id', $zoneId)->findOrFail($microZoneId);
+    }
 
     public function status(Request $request)
     {
@@ -575,3 +601,4 @@ class SurgePriceController extends Controller
 
 
 }
+

@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\V1;
 use App\CentralLogics\CustomerLogic;
 use App\Models\Admin;
 use App\Models\Order;
+use App\Models\Cart;
 use App\Models\Store;
 use App\Models\Refund;
 use App\Mail\PlaceOrder;
+use App\Models\Item;
 use App\Mail\RefundRequest;
 use App\Models\OrderPayment;
 use App\Models\RefundReason;
+use App\Models\ItemCampaign;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\CentralLogics\OrderLogic;
@@ -729,14 +732,99 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'zone_id' => 'required',
             'module_id' => 'required',
-            'date_time' => 'required'
+            'date_time' => 'required',
+            'micro_zone_id' => 'nullable|exists:micro_zones,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        return $this->getSurgePrice($request->zone_id, $request->module_id, $request->date_time);
+        return $this->getSurgePrice($request->zone_id, $request->module_id, $request->date_time, $request->micro_zone_id);
+    }
+
+    public function reorder(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|integer',
+            'replace_cart' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        if (! $request->user()) {
+            return response()->json(['errors' => [['code' => 'auth', 'message' => translate('messages.unauthorized')]]], 401);
+        }
+
+        $order = Order::with('details')
+            ->where('id', $request->order_id)
+            ->where('user_id', $request->user()->id)
+            ->where('is_guest', 0)
+            ->Notpos()
+            ->first();
+
+        if (! $order || $order->details->isEmpty()) {
+            return response()->json(['errors' => [['code' => 'order', 'message' => translate('messages.not_found')]]], 404);
+        }
+
+        if ($request->boolean('replace_cart', true)) {
+            Cart::where('user_id', $request->user()->id)
+                ->where('is_guest', 0)
+                ->where('module_id', $order->module_id)
+                ->whereNull('group_order_id')
+                ->delete();
+        }
+
+        $skipped = [];
+        foreach ($order->details as $detail) {
+            $model = $detail->item_campaign_id ? ItemCampaign::class : Item::class;
+            $itemId = $detail->item_campaign_id ?: $detail->item_id;
+            $item = $model::active()->find($itemId);
+
+            if (! $item) {
+                $skipped[] = [
+                    'item_id' => $itemId,
+                    'reason' => translate('messages.not_found'),
+                ];
+                continue;
+            }
+
+            $addons = collect(json_decode($detail->add_ons, true) ?: []);
+
+            Cart::create([
+                'user_id' => $request->user()->id,
+                'module_id' => $order->module_id,
+                'item_id' => $itemId,
+                'is_guest' => 0,
+                'add_on_ids' => $addons->pluck('id')->values()->all(),
+                'add_on_qtys' => $addons->pluck('quantity')->values()->all(),
+                'item_type' => $model,
+                'price' => $detail->price,
+                'quantity' => $detail->quantity,
+                'variation' => json_decode($detail->variation, true) ?: [],
+            ]);
+        }
+
+        $carts = Cart::where('user_id', $request->user()->id)
+            ->where('is_guest', 0)
+            ->where('module_id', $order->module_id)
+            ->whereNull('group_order_id')
+            ->get()
+            ->map(function ($data) {
+                $data->add_on_ids = is_string($data->add_on_ids) ? json_decode($data->add_on_ids, true) : $data->add_on_ids;
+                $data->add_on_qtys = is_string($data->add_on_qtys) ? json_decode($data->add_on_qtys, true) : $data->add_on_qtys;
+                $data->variation = is_string($data->variation) ? json_decode($data->variation, true) : $data->variation;
+                $data->item = Helpers::cart_product_data_formatting($data->item, $data->variation, $data->add_on_ids, $data->add_on_qtys, false, app()->getLocale());
+                return $data;
+            });
+
+        return response()->json([
+            'message' => translate('messages.added_to_cart_successfully'),
+            'skipped_items' => $skipped,
+            'carts' => $carts,
+        ], 200);
     }
 
 

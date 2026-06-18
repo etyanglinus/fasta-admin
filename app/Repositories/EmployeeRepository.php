@@ -94,7 +94,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
     public function getSearchList(Request $request): Collection
     {
         $key = explode(' ', $request['search']);
-        return $this->employee->zone()->where('role_id', '!=','1')
+        return $this->employee->zone()->where('role_id', '!=','1')->with(['role', 'zones', 'microZone'])
             ->where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->orWhere('f_name', 'like', "%{$value}%");
@@ -118,7 +118,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
     public function getExportList(Request $request): Collection
     {
         $key = explode(' ', $request['search']);
-        return $this->employee->zone()->where('role_id', '!=','1')
+        return $this->employee->zone()->where('role_id', '!=','1')->with(['role', 'zones', 'microZone'])
             ->where(function ($q) use ($key) {
                 foreach ($key as $value) {
                     $q->orWhere('f_name', 'like', "%{$value}%");

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -43,10 +44,14 @@ class EmployeeUpdateRequest extends FormRequest
             'f_name' => 'required|max:100',
             'l_name' => 'nullable|max:100',
             'role_id' => 'required|not_in:1',
+            'zone_id' => 'nullable|exists:zones,id',
             'email' => 'required|unique:admins,email,'.$this->id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:admins,phone,'.$this->id,
             'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
-            'micro_zone_id' => 'nullable|exists:micro_zones,id',
+            'micro_zone_id' => [
+                'nullable',
+                Rule::exists('micro_zones', 'id')->where(fn ($query) => $query->where('zone_id', $this->zone_id)),
+            ],
         ];
     }
 

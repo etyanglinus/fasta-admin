@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin.app')
+@extends('layouts.admin.app')
 @section('title', translate('Employee Add'))
 @push('css_or_js')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -60,7 +60,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div>
-                                        <label class="input-label" for="title">{{ translate('messages.zone') }}<span
+                                        <label class="input-label" for="title">{{ translate('messages.country') }}<span
                                                 class="form-label-secondary text-danger" data-toggle="tooltip"
                                                 data-placement="right"
                                                 data-original-title="{{ translate('messages.Required.') }}"> *
@@ -79,7 +79,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div>
-                                        <label class="input-label">{{ translate('messages.micro_zone') }}</label>
+                                        <label class="input-label">{{ translate('messages.city') }}</label>
                                         <select name="micro_zone_id" id="micro_zone_id" class="form-control js-select2-custom">
                                             <option value="">{{ translate('messages.all') }}</option>
                                         </select>
@@ -284,3 +284,4 @@
     });
 </script>
 @endpush
+

@@ -39,7 +39,7 @@ class ZoneRepository implements ZoneRepositoryInterface
     {
         $key = explode(' ', $searchValue);
 
-        return $this->zone->withCount(['stores','deliverymen'])
+        return $this->zone->withCount(['stores','deliverymen', 'microZones'])
 
             ->when(isset($key) , function($q) use($key){
                 $q->where(function ($q) use ($key) {

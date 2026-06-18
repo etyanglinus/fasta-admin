@@ -1614,8 +1614,13 @@ class Helpers
         return $config;
     }
 
-    public static function currency_code()
+    public static function currency_code($zoneId = null)
     {
+        $zoneCurrency = self::zone_currency_code($zoneId);
+        if ($zoneCurrency) {
+            return $zoneCurrency;
+        }
+
         if (!config('currency')) {
             $currency = self::get_business_settings('currency');
             Config::set('currency', $currency);
@@ -1627,8 +1632,13 @@ class Helpers
     }
 
 
-    public static function currency_symbol()
+    public static function currency_symbol($zoneId = null)
     {
+        $zoneCurrency = self::zone_currency_code($zoneId);
+        if ($zoneCurrency) {
+            return Currency::where(['currency_code' => $zoneCurrency])->first()?->currency_symbol;
+        }
+
         if (!config('currency_symbol')) {
             $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()?->currency_symbol;
             Config::set('currency_symbol', $currency_symbol);
@@ -1638,13 +1648,28 @@ class Helpers
         return $currency_symbol;
     }
 
+    public static function zone_currency_code($zoneId = null): ?string
+    {
+        if (! Schema::hasColumn('zones', 'currency_code')) {
+            return null;
+        }
+
+        $zoneId = $zoneId ?: request()?->zone_id ?: (request()?->header('zoneId') ? data_get(json_decode(request()->header('zoneId'), true), 0) : null);
+
+        if (! $zoneId) {
+            return null;
+        }
+
+        return Zone::where('id', $zoneId)->value('currency_code') ?: null;
+    }
+
     public static function highlight($text)
     {
         if (!$text) return '';
         return preg_replace('/\$(.+?)\$/', '<span class="hl">$1</span>', e($text));
     }
 
-    public static function format_currency($value)
+    public static function format_currency($value, $zoneId = null)
     {
         if (!config('currency_symbol_position')) {
             $currency_symbol_position = self::get_business_settings('currency_symbol_position');
@@ -1653,7 +1678,7 @@ class Helpers
             $currency_symbol_position = config('currency_symbol_position');
         }
 
-        return $currency_symbol_position == 'right' ? number_format($value, config('round_up_to_digit')) . ' ' . self::currency_symbol() : self::currency_symbol() . ' ' . number_format($value, config('round_up_to_digit'));
+        return $currency_symbol_position == 'right' ? number_format($value, config('round_up_to_digit')) . ' ' . self::currency_symbol($zoneId) : self::currency_symbol($zoneId) . ' ' . number_format($value, config('round_up_to_digit'));
     }
 
     public static function sendNotificationToHttp(array|null $data)
@@ -4641,7 +4666,7 @@ class Helpers
                     }
                 }
             } elseif ($type == 'payment_gateway') {
-                $currency = self::get_business_settings('currency');
+                $currency = self::currency_code();
                 if (!empty(self::getPaymentGatewaySupportedCurrencies($data)) && !array_key_exists($currency, self::getPaymentGatewaySupportedCurrencies($data))) {
                     return $data;
                 }

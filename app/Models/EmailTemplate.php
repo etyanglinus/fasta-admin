@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 class EmailTemplate extends Model
 {
     use HasFactory;
+    protected $guarded = ['id'];
     protected $appends = ['image_full_url','logo_full_url','icon_full_url'];
 
     public function getImageFullUrlAttribute(){

@@ -55,6 +55,8 @@ class User extends Authenticatable
         'wallet_balance' => 'float',
         'loyalty_point' => 'integer',
         'ref_by' => 'integer',
+        'date_of_birth' => 'date:Y-m-d',
+        'date_of_birth_updated_at' => 'datetime',
     ];
     protected $appends = ['image_full_url'];
     public function getImageFullUrlAttribute(){
@@ -83,6 +85,10 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class)->where('is_guest', 0);
+    }
+    public function birthdayBonusAwards()
+    {
+        return $this->hasMany(BirthdayBonusAward::class);
     }
     public function fastaPrimeSubscriptions()
     {

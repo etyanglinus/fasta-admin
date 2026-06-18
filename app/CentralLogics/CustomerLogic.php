@@ -29,7 +29,7 @@ class CustomerLogic
         $credit = 0.0;
         $admin_bonus = 0.0;
 
-        if (in_array($transaction_type, ['add_fund_by_admin', 'add_fund', 'order_refund', 'loyalty_point', 'referrer','CashBack','subscription_refund'])) {
+        if (in_array($transaction_type, ['add_fund_by_admin', 'add_fund', 'order_refund', 'loyalty_point', 'referrer','CashBack','subscription_refund','birthday_bonus'])) {
             $credit = $amount;
             if ($transaction_type == 'add_fund') {
                 $admin_bonus = self::calculate_wallet_bonus($amount);
@@ -70,7 +70,7 @@ class CustomerLogic
                 Helpers::expenseCreate(amount:$amount,type:'referrer',created_by:'admin',user_id:$user->id,datetime:now());
             }
             DB::commit();
-            if (in_array($transaction_type, ['loyalty_point', 'trip_booking', 'order_place', 'add_fund_by_admin', 'referrer','partial_payment'])) return $wallet_transaction;
+            if (in_array($transaction_type, ['loyalty_point', 'trip_booking', 'order_place', 'add_fund_by_admin', 'referrer','partial_payment','birthday_bonus'])) return $wallet_transaction;
             return true;
         } catch (\Exception $ex) {
             info($ex->getMessage());

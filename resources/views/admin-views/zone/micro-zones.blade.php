@@ -1,38 +1,38 @@
 @extends('layouts.admin.app')
 
-@section('title', translate('Micro Zones'))
+@section('title', translate('Cities'))
 
 @section('content')
     <div class="content container-fluid">
         <div class="page-header">
-            <h1 class="page-header-title">{{ translate('Micro Zones') }}</h1>
+            <h1 class="page-header-title">{{ translate('Cities') }}</h1>
         </div>
 
         <div class="alert alert-soft-info mb-3">
             <strong>{{ translate('How this works') }}:</strong>
-            {{ translate('Zones are countries. Micro zones are city delivery areas inside that country. Draw each city boundary so customers in one city cannot order from stores assigned to another city.') }}
+            {{ translate('Countries contain cities. Draw each city boundary so customers in one city cannot order from stores assigned to another city.') }}
         </div>
 
         <div class="row g-3">
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">{{ translate('Add City / Micro Zone') }}</h5>
+                        <h5 class="mb-0">{{ translate('Add City') }}</h5>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('admin.business-settings.zone.micro-zones.store') }}" method="post">
                             @csrf
                             <div class="form-group">
-                                <label class="input-label">{{ translate('Country Zone') }}</label>
+                                <label class="input-label">{{ translate('Country') }}</label>
                                 <select name="zone_id" id="micro-zone-country" class="form-control js-select2-custom" required>
-                                    <option value="">{{ translate('Select country zone') }}</option>
+                                    <option value="">{{ translate('Select country') }}</option>
                                     @foreach($zones as $zone)
                                         <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="input-label">{{ translate('City / Micro Zone Name') }}</label>
+                                <label class="input-label">{{ translate('City Name') }}</label>
                                 <input type="text" name="name" class="form-control" placeholder="{{ translate('Example: Nairobi, Mombasa, Kisumu') }}" required maxlength="191">
                             </div>
                             <div class="form-group">
@@ -58,10 +58,10 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header justify-content-between">
-                        <h5 class="mb-0">{{ translate('Micro Zone List') }}</h5>
+                        <h5 class="mb-0">{{ translate('City List') }}</h5>
                         <form class="d-flex gap-2">
                             <select name="zone_id" class="form-control js-select2-custom" onchange="this.form.submit()">
-                                <option value="">{{ translate('messages.All_Zones') }}</option>
+                                <option value="">{{ translate('messages.all_countries') }}</option>
                                 @foreach($zones as $zone)
                                     <option value="{{ $zone->id }}" {{ request('zone_id') == $zone->id ? 'selected' : '' }}>{{ $zone->name }}</option>
                                 @endforeach
@@ -73,8 +73,11 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th>{{ translate('messages.sl') }}</th>
-                                    <th>{{ translate('messages.zone') }}</th>
-                                    <th>{{ translate('Micro Zone') }}</th>
+                                    <th>{{ translate('messages.country') }}</th>
+                                    <th>{{ translate('messages.city') }}</th>
+                                    <th>{{ translate('messages.modules') }}</th>
+                                    <th>{{ translate('Stores') }}</th>
+                                    <th>{{ translate('Deliverymen') }}</th>
                                     <th>{{ translate('Coverage') }}</th>
                                     <th>{{ translate('messages.status') }}</th>
                                     <th class="text-center">{{ translate('messages.action') }}</th>
@@ -92,6 +95,22 @@
                                             @endif
                                         </td>
                                         <td>
+                                            @forelse($microZone->modules as $module)
+                                                <span class="badge badge-soft-info mb-1">{{ $module->module_name }}</span>
+                                            @empty
+                                                <span class="text-muted">{{ translate('No modules enabled') }}</span>
+                                            @endforelse
+                                            <div class="fs-12 text-muted mt-1">
+                                                {{ $microZone->modules_count }} {{ translate('enabled') }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-soft-secondary">{{ $microZone->stores_count }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-soft-secondary">{{ $microZone->deliverymen_count }}</span>
+                                        </td>
+                                        <td>
                                             <span class="badge {{ $microZone->coordinates ? 'badge-soft-success' : 'badge-soft-warning' }}">
                                                 {{ $microZone->coordinates ? translate('Drawn') : translate('Needs map') }}
                                             </span>
@@ -103,6 +122,20 @@
                                         </td>
                                         <td>
                                             <div class="btn--container justify-content-center">
+                                                <a href="{{ route('admin.business-settings.zone.module-setup', [$microZone->zone_id, 'micro_zone_id' => $microZone->id]) }}"
+                                                   class="btn btn-sm btn-outline-theme-dark action-btn"
+                                                   data-toggle="tooltip"
+                                                   data-placement="bottom"
+                                                   data-original-title="{{ translate('Assign modules') }}">
+                                                    <i class="tio-apps"></i>
+                                                </a>
+                                                <a href="{{ route('admin.business-settings.zone.surge-price.list', [$microZone->zone_id, 'micro_zone_id' => $microZone->id]) }}"
+                                                   class="btn btn-sm btn-outline-theme-light action-btn"
+                                                   data-toggle="tooltip"
+                                                   data-placement="bottom"
+                                                   data-original-title="{{ translate('Surge prices') }}">
+                                                    <i class="tio-trending-up"></i>
+                                                </a>
                                                 <button type="button" class="btn btn-sm btn--primary btn-outline-primary action-btn" data-toggle="modal" data-target="#edit-micro-zone-{{ $microZone->id }}">
                                                     <i class="tio-edit"></i>
                                                 </button>
@@ -123,12 +156,12 @@
                                                     @csrf
                                                     @method('put')
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title">{{ translate('Edit Micro Zone') }}</h5>
+                                                        <h5 class="modal-title">{{ translate('Edit City') }}</h5>
                                                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="form-group">
-                                                            <label class="input-label">{{ translate('messages.zone') }}</label>
+                                                            <label class="input-label">{{ translate('messages.country') }}</label>
                                                             <select name="zone_id" class="form-control" required>
                                                                 @foreach($zones as $zone)
                                                                     <option value="{{ $zone->id }}" {{ $microZone->zone_id == $zone->id ? 'selected' : '' }}>{{ $zone->name }}</option>
@@ -136,7 +169,7 @@
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label class="input-label">{{ translate('Micro Zone Name') }}</label>
+                                                            <label class="input-label">{{ translate('City Name') }}</label>
                                                             <input type="text" name="name" class="form-control" value="{{ $microZone->name }}" required maxlength="191">
                                                         </div>
                                                         <div class="form-group">
@@ -309,5 +342,7 @@
         });
     });
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initializeMicroZoneMap&libraries=drawing,places,marker&v=3.61"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initializeMicroZoneMap&libraries=drawing,places,marker&v=3.62"></script>
 @endpush
+
+

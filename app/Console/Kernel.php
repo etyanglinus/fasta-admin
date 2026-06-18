@@ -25,6 +25,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('system:daily-backup')->dailyAt('02:00')->withoutOverlapping();
+        $schedule->command('birthday-bonus:process')->dailyAt('03:00')->withoutOverlapping();
     }
 
     /**

@@ -12,9 +12,15 @@
 @section('content')
 <div class="content container-fluid">
 
-    <h3 class="mb-20">{{translate('Edit Surge Price') }}</h3>
+    <h3 class="mb-20">
+        {{translate('Edit Surge Price') }}
+        @if($selectedMicroZone)
+            - {{ $selectedMicroZone->name }}
+        @endif
+    </h3>
       <form action="{{ route('admin.business-settings.zone.surge-price.update', $surge->id) }}" method="post" id="surge_form">
         @csrf
+        <input autocomplete="off" type="hidden" name="micro_zone_id" value="{{ $selectedMicroZone?->id }}">
         <div class="card mb-20">
             <div class="card-header">
                 <h4 class="mb-0">{{translate('Basic Setup')}}</h4>
@@ -102,8 +108,11 @@
                         <div>
                             <label class="mb-2 d-block title-clr fw-normal">{{ translate('Module') }} <span class="text-danger">*</span></label>
                             @php($modules = \App\Models\Module::
-                                    whereHas('zones', function ($query) use ($surge) {
+                                    whereHas('zones', function ($query) use ($surge, $selectedMicroZone) {
                                 $query->where('zone_id', $surge->zone_id);
+                                if ($selectedMicroZone) {
+                                    $query->where('module_zone.micro_zone_id', $selectedMicroZone->id);
+                                }
                             })
                             ->where('module_type','!=','rental')->get())
                             <select name="module_ids[]" id="module_selected" class="form-control h--45px js-select2-custom" multiple="multiple" placeholder="Module Select" data-placeholder="Module">
@@ -126,7 +135,7 @@
                                     <select name="price_type" id="price_type" class="custom-select ltr border-0">
                                         <option value="percent" {{ $surge->price_type == 'percent' ? 'selected' : '' }}>%</option>
                                         <option value="amount" {{ $surge->price_type == 'amount' ? 'selected' : '' }}>
-                                            {{ \App\CentralLogics\Helpers::currency_symbol() }}
+                                            {{ \App\CentralLogics\Helpers::currency_symbol($surge->zone_id) }}
                                         </option>
                                     </select>
                                 </div>

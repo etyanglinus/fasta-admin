@@ -14,7 +14,7 @@
         <h1 class="page-header-title">
 
             <span>
-                {{translate('messages.Zone_setup')}}
+                {{translate('messages.country_setup')}}
             </span>
         </h1>
     </div>
@@ -36,7 +36,7 @@
         <div class="col-12">
             <form action="javascript:" method="post" id="zone_form" class="shadow--card">
                 <div class="card-header flex-wrap gap-1 pt-0 mb-20">
-                    <h4 class="mb-0">{{translate('Add New Zone')}}</h4>
+                    <h4 class="mb-0">{{translate('Add New Country')}}</h4>
                     <a href="#0"
                         class="border-primary py-2 px-3 border d-flex align-items-center gap-2 fs-14 font-semibold theme-clr-dark bg-opacity-primary-10 rounded-pill offcanvas-trigger"
                         data-target="#instruction__customBtn2">
@@ -69,10 +69,10 @@
                                     <div class="row g-3 lang_form" id="default-form">
                                         <div class="form-group col-12 mb-0">
                                             <label class="input-label"
-                                                for="exampleFormControlInput1">{{ translate('messages.business_Zone_name')}}
+                                                for="exampleFormControlInput1">{{ translate('messages.country_name')}}
                                                 ({{ translate('messages.default') }})</label>
                                             <input type="text" name="name[]" class="form-control"
-                                                placeholder="{{translate('messages.Write_a_New_Business_Zone_Name')}}"
+                                                placeholder="{{translate('messages.write_a_new_country_name')}}"
                                                 maxlength="191">
                                         </div>
                                         <div class="form-group col-12 mb-0">
@@ -89,10 +89,10 @@
                                         <div class="row g-3 lang_form d-none" id="{{$lang}}-form">
                                             <div class="form-group col-12 mb-0">
                                                 <label class="input-label"
-                                                    for="exampleFormControlInput1">{{ translate('messages.business_Zone_name')}}
+                                                    for="exampleFormControlInput1">{{ translate('messages.country_name')}}
                                                     ({{strtoupper($lang)}})</label>
                                                 <input type="text" name="name[]" class="form-control"
-                                                    placeholder="{{translate('messages.Write_a_New_Business_Zone_Name')}}"
+                                                    placeholder="{{translate('messages.write_a_new_country_name')}}"
                                                     maxlength="191">
                                             </div>
                                             <div class="form-group col-12 mb-0">
@@ -148,14 +148,14 @@
                 <div class="card-header py-2 border-0">
                     <div class="search--button-wrapper">
                         <h5 class="card-title">
-                            {{translate('messages.zone_list')}}<span class="badge badge-soft-dark ml-2"
+                            {{translate('messages.country_list')}}<span class="badge badge-soft-dark ml-2"
                                 id="itemCount">{{$zones->total()}}</span>
                         </h5>
                         <form class="search-form">
                             <!-- Search -->
                             <div class="input-group input--group">
                                 <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                    placeholder="{{translate('messages.Search_Business_Zone')}}"
+                                    placeholder="{{translate('messages.search_country')}}"
                                     value="{{ request()?->search ?? null }}"
                                     aria-label="{{translate('messages.search')}}" required>
                                 <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
@@ -321,7 +321,7 @@
 
 @push('script_2')
 <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initialize&libraries=drawing,places,marker&v=3.61"></script>
+    src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initialize&libraries=drawing,places,marker&v=3.62"></script>
 <script>
     "use strict";
     $(".popover-wrapper").click(function () {
@@ -618,3 +618,4 @@
     })
 </script>
 @endpush
+

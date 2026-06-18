@@ -19,7 +19,8 @@ class MicroZoneController extends Controller
     public function index(Request $request): View
     {
         $zones = Zone::active()->get(['id', 'name']);
-        $microZones = MicroZone::with('zone')
+        $microZones = MicroZone::with(['zone', 'modules:id,module_name'])
+            ->withCount(['modules', 'stores', 'deliverymen'])
             ->when($request->zone_id, fn ($query) => $query->where('zone_id', $request->zone_id))
             ->latest()
             ->paginate(config('default_pagination'));
@@ -143,3 +144,4 @@ class MicroZoneController extends Controller
         return true;
     }
 }
+

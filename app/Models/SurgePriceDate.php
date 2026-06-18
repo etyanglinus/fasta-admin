@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class SurgePriceDate extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'micro_zone_id' => 'integer',
+    ];
     
     protected $fillable = [
         'surge_price_id',
         'zone_id',
+        'micro_zone_id',
         'module_id',
         'applicable_date',
         'start_time',
@@ -21,6 +26,11 @@ class SurgePriceDate extends Model
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function microZone()
+    {
+        return $this->belongsTo(MicroZone::class);
     }
 
     public function surge_price()
@@ -39,3 +49,4 @@ class SurgePriceDate extends Model
     }
 
 }
+

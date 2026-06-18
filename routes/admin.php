@@ -357,6 +357,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('update-disbursement', 'BusinessSettingsController@update_disbursement')->name('update-disbursement');
             Route::post('update-store', 'BusinessSettingsController@update_store')->name('update-store');
             Route::post('update-order', 'BusinessSettingsController@update_order')->name('update-order');
+            Route::get('birthday-bonus', 'BirthdayBonusController@show')->name('birthday-bonus.show');
+            Route::post('birthday-bonus', 'BirthdayBonusController@update')->name('birthday-bonus.update');
             Route::post('update-priority', 'BusinessSettingsController@update_priority')->name('update-priority');
             Route::get('app-settings', 'BusinessSettingsController@app_settings')->name('app-settings');
             Route::POST('app-settings', 'BusinessSettingsController@update_app_settings')->name('app-settings-update');

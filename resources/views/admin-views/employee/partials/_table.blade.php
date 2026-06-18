@@ -6,6 +6,8 @@
         {{$employee['email']}}
     </td>
     <td>{{$employee['phone']}}</td>
+    <td>{{ $employee->zones?->name ?? translate('messages.all') }}</td>
+    <td>{{ $employee->microZone?->name ?? translate('messages.all') }}</td>
     <td>{{$employee->role?$employee->role['name']:translate('messages.role_deleted')}}</td>
     <td>
         @if (auth('admin')->id()  != $employee['id'])
@@ -24,3 +26,4 @@
     </td>
 </tr>
 @endforeach
+

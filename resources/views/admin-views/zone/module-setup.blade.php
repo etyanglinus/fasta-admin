@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title', translate('Zone Wise Module Setup'))
+@section('title', translate('Country Wise Module Setup'))
 
 @push('css_or_js')
 @endpush
@@ -16,7 +16,7 @@
                 </span>
             </h1>
             <p class="fs-14">
-                {{ translate('Here_you_connect_your_modules_&_setup_the_delivery_charges_for_this_zone.') }}
+                {{ translate('Here you connect modules, city delivery charges, and country payment settings.') }}
             </p>
         </div>
         <!-- End Page Header -->
@@ -30,7 +30,7 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="form-group mb-0">
-                                    <label class="input-label">{{ translate('Zone Currency') }}</label>
+                                    <label class="input-label">{{ translate('Country Currency') }}</label>
                                     <select name="currency_code" class="form-control js-select2-custom">
                                         <option value="">{{ translate('Use system default currency') }}</option>
                                         @foreach($currencies ?? [] as $currency)
@@ -131,7 +131,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="form-group mb-0">
-                            <label class="input-label">{{ translate('Choose_Micro_Zone_To_Connect_Modules') }}</label>
+                            <label class="input-label">{{ translate('Choose City To Connect Modules') }}</label>
                             <select name="micro_zone_id" id="choice_micro_zone" class="form-control js-select2-custom" onchange="window.location='{{ route('admin.business-settings.zone.module-setup', $zone->id) }}?micro_zone_id='+this.value">
                                 @forelse($microZones ?? [] as $microZone)
                                     <option value="{{ $microZone->id }}" {{ (int) $selectedMicroZoneId === $microZone->id ? 'selected' : '' }}>{{ $microZone->name }}</option>
@@ -139,7 +139,7 @@
                                     <option value="">{{ translate('No_micro_zone_found_for_this_zone') }}</option>
                                 @endforelse
                             </select>
-                            <small class="text-muted">{{ translate('Modules_selected_below_will_be_available_only_in_this_micro_zone.') }}</small>
+                            <small class="text-muted">{{ translate('Modules selected below will be available only in this city.') }}</small>
                         </div>
                     </div>
                 </div>
@@ -293,7 +293,7 @@
                                                 <label
                                                     class="input-label text-capitalize fs-14 d-flex alig-items-center line--limit-1">
                                                     {{ translate('messages.Amount') }}
-                                                    ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                                    ({{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }})
                                                     <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" class="form-control"
@@ -308,7 +308,7 @@
                                                 <label
                                                     class="input-label text-capitalize fs-14 d-flex alig-items-center line--limit-1">
                                                     {{ translate('messages.Per_km_delivery_charge') }}
-                                                    ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <span
+                                                    ({{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }}) <span
                                                         class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" class="form-control"
@@ -323,7 +323,7 @@
                                                 <label
                                                     class="input-label text-capitalize fs-14 d-flex alig-items-center line--limit-1">
                                                     {{ translate('messages.Minimum_delivery_charge') }}
-                                                    ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <span
+                                                    ({{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }}) <span
                                                         class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" step=".01" min="0" class="form-control"
@@ -337,7 +337,7 @@
                                                 <label
                                                     class="input-label text-capitalize fs-14 d-flex alig-items-center line--limit-1">
                                                     {{ translate('messages.Maximum_delivery_charge') }}
-                                                    ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                                    ({{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }})
                                                 </label>
                                                 <input type="number" step=".01" min="0" class="form-control"
                                                        name="module_data[{{ $module->id }}][maximum_shipping_charge]"
@@ -350,7 +350,7 @@
                                                 <label
                                                     class="input-label text-capitalize fs-14 d-flex alig-items-center line--limit-1">
                                                     {{ translate('messages.Maximum_cod_order_amount') }}
-                                                    ({{ \App\CentralLogics\Helpers::currency_symbol() }})
+                                                    ({{ \App\CentralLogics\Helpers::currency_symbol($zone->id) }})
                                                 </label>
                                                 <input type="number" step=".01" min="0" class="form-control"
                                                        name="module_data[{{ $module->id }}][maximum_cod_order_amount]"
@@ -450,4 +450,5 @@
 
     </script>
 @endpush
+
 

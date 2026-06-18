@@ -9,8 +9,12 @@
               <thead class="thead-light">
                   <tr>
                       <th class="border-0">{{ translate('messages.SL') }}</th>
-                      <th class="border-0">{{ translate('messages.zone_Id') }}</th>
-                      <th class="border-0">{{ translate('messages.business_Zone_name') }}</th>
+                      <th class="border-0">{{ translate('messages.country_id') }}</th>
+                      <th class="border-0">{{ translate('messages.country_name') }}</th>
+                      <th class="border-0">{{ translate('messages.cities') }}</th>
+                      <th class="border-0">{{ translate('messages.modules') }}</th>
+                      <th class="border-0">{{ translate('messages.currency') }}</th>
+                      <th class="border-0">{{ translate('Payment Gateway') }}</th>
                       <th class="border-0">{{ translate('messages.vendors') }}</th>
                       <th class="border-0">{{ translate('messages.deliverymen') }}</th>
                         <th class="border-0 text-center">{{ translate('Default_Status') }}</th>
@@ -29,6 +33,29 @@
                           <td>
                               <span class="d-block font-size-sm text-body">
                                   {{ $zone['name'] }}
+                              </span>
+                          </td>
+                          <td>
+                              <a href="{{ route('admin.business-settings.zone.micro-zones.index', ['zone_id' => $zone['id']]) }}"
+                                  class="badge badge-soft-info">
+                                  {{ $zone->micro_zones_count ?? $zone->microZones?->count() ?? 0 }}
+                              </a>
+                          </td>
+                          <td>
+                              <a href="{{ route('admin.business-settings.zone.module-setup', [$zone['id']]) }}"
+                                  class="badge badge-soft-primary">
+                                  {{ $zone->modules?->count() ?? 0 }}
+                              </a>
+                          </td>
+                          <td>
+                              <span class="badge {{ $zone->currency_code ? 'badge-soft-success' : 'badge-soft-warning' }}">
+                                  {{ $zone->currency_code ?: translate('Default') }}
+                              </span>
+                          </td>
+                          <td>
+                              @php($gatewayCount = $zone->paymentGateways?->where('status', 1)->count() ?? 0)
+                              <span class="badge {{ $gatewayCount ? 'badge-soft-success' : 'badge-soft-secondary' }}">
+                                  {{ $gatewayCount ? $gatewayCount . ' ' . translate('Selected') : translate('All active') }}
                               </span>
                           </td>
                           <td>
@@ -255,3 +282,4 @@
               </h5>
           </div>
       @endif
+

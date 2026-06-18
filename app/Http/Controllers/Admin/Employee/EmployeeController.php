@@ -48,7 +48,7 @@ class EmployeeController extends BaseController
     {
         $zoneId = $request->query('zone_id', 'all');
         $employees = $this->employeeRepo->getZoneWiseListWhere(searchValue: $request['search'],
-        relations:['role'],
+        relations:['role', 'zones', 'microZone'],
         zoneId: $zoneId,
         dataLimit: config('default_pagination'));
         return view(EmployeeViewPath::INDEX[VIEW], compact('employees'));
@@ -129,3 +129,4 @@ class EmployeeController extends BaseController
         return Excel::download(new EmployeeListExport($data), Employee::EXPORT_XLSX);
     }
 }
+

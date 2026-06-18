@@ -11,7 +11,12 @@
 @if(count($zone->surge_prices) > 0 )
     <div class="content container-fluid">
 
-        <h3 class="mb-20">{{translate('messages.Surge_Price')}}</h3>
+        <h3 class="mb-20">
+            {{translate('messages.Surge_Price')}}
+            @if($selectedMicroZone)
+                - {{ $selectedMicroZone->name }}
+            @endif
+        </h3>
         <div class="card">
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper">
@@ -27,7 +32,7 @@
                         </div>
                         <!-- End Search -->
                     </form>
-                    <a href="{{route('admin.business-settings.zone.surge-price.create',[$zone['id']])}}" class="btn btn--primary">{{ translate('Create Surge Price') }}</a>
+                    <a href="{{route('admin.business-settings.zone.surge-price.create',[$zone['id'], 'micro_zone_id' => $selectedMicroZone?->id])}}" class="btn btn--primary">{{ translate('Create Surge Price') }}</a>
                 </div>
             </div>
             <!-- Table -->
@@ -65,13 +70,13 @@
                             <td class="pl-4">{{$key+$surges->firstItem()}}</td>
                             <td>{{{$surge['surge_price_name']}}}</td>
                             <td>
-                                @php($names = \App\models\Module::whereIn('id', $surge->module_ids)->pluck('module_name')->implode(', '))
+                                @php($names = \App\Models\Module::whereIn('id', $surge->module_ids)->pluck('module_name')->implode(', '))
                                 <span class="d-block text-limit-2 max-w-220px">
                                     {{$names}}
                                 </span>
                             </td>
                             <td>
-                                {{{$surge['price']}}}{{ $surge['price_type'] === 'percent' ? '%' : \App\CentralLogics\Helpers::currency_symbol() }}
+                                {{{$surge['price']}}}{{ $surge['price_type'] === 'percent' ? '%' : \App\CentralLogics\Helpers::currency_symbol($zone->id) }}
                             </td>
                             <td class="text-capitalize">
                                 {{{$surge['duration_type']}}}
@@ -174,7 +179,7 @@
                                 <img class="mb-20" src="{{asset('public/assets/admin/img/price-emty.png')}}" alt="status">
                                 <h4 class="mb-3">{{ translate('Currently you don’t have any Surge Price') }}</h4>
                                 <p class="mb-20 fs-12 mx-auto max-w-400px">{{ translate('To enable surge pricing, you must create at least one Surge Price. In this page you see all the surge price you added.') }}</p>
-                                <a href="{{route('admin.business-settings.zone.surge-price.create',[$zone['id']])}}" class="btn btn--primary">
+                                <a href="{{route('admin.business-settings.zone.surge-price.create',[$zone['id'], 'micro_zone_id' => $selectedMicroZone?->id])}}" class="btn btn--primary">
                                     {{ translate('Create Surge Price') }}
                                 </a>
                             </div>

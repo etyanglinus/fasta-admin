@@ -588,6 +588,7 @@ class CustomerController extends Controller
             'phone' => 'required|unique:users,phone,' . $request?->user()?->id,
             'image' => 'nullable|max:2048',
             'password' => ['nullable', Password::min(8)],
+            'date_of_birth' => 'nullable|date|before:today',
         ]);
 
         if ($validator->fails()) {
@@ -604,6 +605,13 @@ class CustomerController extends Controller
         }
 
         $user = User::where(['id' => $request?->user()?->id])->with('userinfo')->first();
+        if ($request->filled('date_of_birth') && $user->date_of_birth && $user->date_of_birth->toDateString() !== $request->date_of_birth) {
+            return response()->json([
+                'errors' => [
+                    ['code' => 'date_of_birth', 'message' => translate('messages.date_of_birth_can_only_be_set_once')]
+                ]
+            ], 403);
+        }
 
         $login_settings = array_column(BusinessSetting::whereIn('key', ['email_verification_status', 'phone_verification_status', 'firebase_otp_verification'])->get(['key', 'value'])->toArray(), 'value', 'key');
 
@@ -780,6 +788,10 @@ class CustomerController extends Controller
         $user->password = $pass;
         $user->phone = $request->phone;
         $user->email = $request->email;
+        if ($request->filled('date_of_birth') && ! $user->date_of_birth) {
+            $user->date_of_birth = $request->date_of_birth;
+            $user->date_of_birth_updated_at = now();
+        }
         $user->save();
 
         if ($user->userinfo) {
