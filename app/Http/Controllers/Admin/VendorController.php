@@ -83,8 +83,8 @@ class VendorController extends Controller
                 }, ],
             'zone_id' => 'required',
             'micro_zone_id' => 'nullable|exists:micro_zones,id',
-            'logo' => 'required|image|max:2048|dimensions:width=500,height=500|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
-            'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'logo' => 'required|image|max:2048|dimensions:ratio=1/1|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'cover_photo' => 'nullable|image|max:2048|dimensions:ratio=3/1|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
 
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
@@ -233,8 +233,8 @@ class VendorController extends Controller
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
             'delivery_time_type' => 'required',
-            'logo' => 'nullable|image|max:2048|dimensions:width=500,height=500|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
-            'cover_photo' => 'nullable|image|max:2048|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'logo' => 'nullable|image|max:2048|dimensions:ratio=1/1|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
+            'cover_photo' => 'nullable|image|max:2048|dimensions:ratio=3/1|mimes:'.IMAGE_FORMAT_FOR_VALIDATION,
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'name.0.required' => translate('default_name_is_required'),

@@ -21,7 +21,7 @@ class ModuleCheckMiddleware
         ];
 
         foreach ($except as $except) {
-            if ($request->fullUrlIs($except) || $request->is($except)) {
+            if ($request->is($except) || $request->fullUrlIs('*'.$except)) {
                 if(!$request->hasHeader('moduleId')) {
                     return $next($request);
                 }
